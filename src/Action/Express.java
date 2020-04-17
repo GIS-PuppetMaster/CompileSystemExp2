@@ -36,12 +36,11 @@ public class Express {
   public String getTail() {
     return tail;
   }
-
-  public String getHopingSymbol() {
+  public String getHopingSymbols(){
     return hopingSymbol;
   }
-
-  public void setHopingSymbol(String hopingSymbol) {
+  public void setHopingSymbols(String hopingSymbol){
     this.hopingSymbol = hopingSymbol;
+    return;
   }
 }

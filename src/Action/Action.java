@@ -2,15 +2,12 @@ package Action;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class Action {
@@ -20,27 +17,32 @@ public class Action {
   Set<String> virSet = new HashSet<String>();
   
   public void init() throws IOException {
-    File synFile = new File("syn.txt");
+    File synFile = new File("grammar.txt");
     BufferedReader fileReader = new BufferedReader(new FileReader(synFile));
     String line = null;
     while ((line = fileReader.readLine()) != null) {
       String[] words = line.split("->");
-      String[] right = words[2].split("\\|");
+      String[] right = words[1].split(" 丨 ");
       for (int i = 0; i < right.length; i++) {
-        proList.add(new Express(words[0], right[i]));
+        proList.add(new Express(words[0].trim(), right[i].trim()));
       }
-      virSet.add(words[0]);
+      virSet.add(words[0].trim());
       
     }
   }
- 
   
-  public void getFirst(String[] string) {
-    
+  public static void main(String[] args) throws IOException {
+    Action action = new Action();
+    action.init();
+    for (String string : action.getVirSet()) {
+      System.out.println(string);
+      Set<String> re = action.getFirst(string);
+      for (String s : re) {
+        System.out.print(s+" ");
+      }
+      System.out.println();
+    }
   }
-  
-  
-
 
   /**
    * 判断是不是终结符，如果左边没这个作为开头的，那就是终结符了。
@@ -111,7 +113,7 @@ public class Action {
     for (int i = 0; i < production.getRight().length; i++) {
       if (!production.getLeft().equals(production.getRight()[i])) {
         list.addAll(getFirst(production.getRight()[i]));
-        System.out.println(production.getRight()[i]);
+//        System.out.println(production.getRight()[i]);
       } // 没有左递归
       if (!isEmpty(production.getRight()[i])) {
         // 这个项里没有包含空产生式的话，就继续求解，否则结束。
@@ -142,28 +144,28 @@ public class Action {
    * @param str
    * @return
    */
-  public List<String> getFirst(String str) {
+  public Set<String> getFirst(String str) {
     List<String> list = new ArrayList<>();
     List<Express> productions = findLeft(str);
-    System.out.println(productions);
+//    System.out.println(productions);
     for (Iterator<Express> iterator = productions.iterator(); iterator
         .hasNext();) {
       Express production = (Express) iterator.next();
       if (isEmpty(production.getRight())) {
-        System.out.println("-------------------null------------------");
+//        System.out.println("-------------------null------------------");
         // 检查X->null是否成立
         list.add("null");
       } else if (!isVariable(production.getRight()[0])
           && !isEmpty(production.getRight())) {
         // 是终结符的话就直接加入。
-        System.out.println("-------------------vict------------------");
+//        System.out.println("-------------------vict------------------");
         list.add(production.getRight()[0]);
       } else {
-        System.out.println("-------------------set------------------");
+//        System.out.println("-------------------set------------------");
         list.addAll(getFirstItem(production));
       }
     }
-    return list;
+    return new HashSet<String>(list);
   }
   
   
@@ -177,11 +179,9 @@ public class Action {
         for (int i = 0; i < avail.size(); i++) {
           Express add = avail.get(i);
           add.setIndex(0);
-          List<String> first = getFirst(express.getRight()[express.getIndex()]+express.getHopingSymbols());
+          Set<String> first = getFirst(express.getRight()[express.getIndex()]+express.getHopingSymbols());
           for (String hope : first) {
-            Set<String> hopeSet = new HashSet<String>();
-            hopeSet.add(hope);
-            add.setHopingSymbols(hopeSet);
+            add.setHopingSymbols(hope);
             project.add(add);
           }
         }
