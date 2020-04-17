@@ -179,9 +179,9 @@ public class Action {
         for (int i = 0; i < avail.size(); i++) {
           Express add = avail.get(i);
           add.setIndex(0);
-          Set<String> first = getFirst(express.getRight()[express.getIndex()]+express.getHopingSymbol());
+          Set<String> first = getFirst(express.getRight()[express.getIndex()]+express.getHopingSymbols());
           for (String hope : first) {
-            add.setHopingSymbol(hope);
+            add.setHopingSymbols(hope);
             project.add(add);
           }
         }
@@ -198,7 +198,7 @@ public class Action {
     for (Express express : project) {
       Express newExp = new Express(express.getLeft(), express.getTail());
       newExp.setIndex(express.getIndex()+1);
-      newExp.setHopingSymbol(newExp.getHopingSymbol());
+      newExp.setHopingSymbols(newExp.getHopingSymbols());
     }
     return jSet;
   }
