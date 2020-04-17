@@ -14,7 +14,7 @@ public class Express {
     this.index = index;
   }
   String[] tailStrings;
-  Set<String> hopingSymbol = new HashSet<String>();
+  String hopingSymbol;
   public Express(String head, String tail) {
     this.head = head;
     this.tail = tail;
@@ -36,14 +36,12 @@ public class Express {
   public String getTail() {
     return tail;
   }
-  public void addHopingSymbol(String s){
-    hopingSymbol.add(s);
+
+  public String getHopingSymbol() {
+    return hopingSymbol;
   }
-  public Set<String> getHopingSymbols(){
-    return new HashSet<String>(hopingSymbol);
-  }
-  public void setHopingSymbols(Set<String> hopingSymbol){
+
+  public void setHopingSymbol(String hopingSymbol) {
     this.hopingSymbol = hopingSymbol;
-    return;
   }
 }
