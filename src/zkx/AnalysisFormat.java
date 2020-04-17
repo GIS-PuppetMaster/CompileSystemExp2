@@ -42,7 +42,7 @@ public class AnalysisFormat {
 
     public Set<Set<Express>> items(List<Express> G) {
         Express start = G.get(0);
-        start.setHopingSymbol("$");
+        start.setHopingSymbols("$");
         boolean added = false;
         Set<Set<Express>> C = new HashSet<>() {{
             add(action.closure_method(new HashSet<>() {{
@@ -83,7 +83,7 @@ public class AnalysisFormat {
                         String S_ = action.getProList().get(0).getLeft();
                         if(action.getVirSet().contains(last)&& !express.getLeft().equals(S_)){
                             format.put(inverseIndexMap.get(expresses), new HashMap<>() {{
-                                put(express.getHopingSymbol(), new FormatElement(action.getProList().indexOf(express), "r"));
+                                put(express.getHopingSymbols(), new FormatElement(action.getProList().indexOf(express), "r"));
                             }});
                         }
                         else if(!action.getVirSet().contains(last)){
