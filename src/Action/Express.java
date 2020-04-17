@@ -1,10 +1,5 @@
 package Action;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,14 +14,12 @@ public class Express {
     this.index = index;
   }
   String[] tailStrings;
-  Set<String> hopingSymbol = new HashSet<>();
+  Set<String> hopingSymbol = new HashSet<String>();
   public Express(String head, String tail) {
     this.head = head;
     this.tail = tail;
     tailStrings = tail.split("\\s");
   }
-
-
 
   public String getLeft() {
     return head;
@@ -40,8 +33,17 @@ public class Express {
   public void setTail(String tail) {
     this.tail = tail;
   }
-  public void addHopingSymbol(String s){hopingSymbol.add(s);}
-  public Set<String> getHopingSymbols(){return hopingSymbol;}
+  public String getTail() {
+    return tail;
+  }
+  public void addHopingSymbol(String s){
+    hopingSymbol.add(s);
+  }
+  public Set<String> getHopingSymbols(){
+    return new HashSet<String>(hopingSymbol);
+  }
+  public void setHopingSymbols(Set<String> hopingSymbol){
+    this.hopingSymbol = hopingSymbol;
+    return;
+  }
 }
-
-

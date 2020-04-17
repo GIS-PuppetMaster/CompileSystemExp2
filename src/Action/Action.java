@@ -16,11 +16,9 @@ import java.util.Set;
 public class Action {
   //存储读入的文法表达式
   List<Express> proList = new ArrayList<Express>();
-  //存储非终结符的first集
-  Map<String, Set<String>> firstMap = new HashMap<String, Set<String>>();
   //存储所有非终结符
   Set<String> virSet = new HashSet<String>();
-
+  
   public void init() throws IOException {
     File synFile = new File("syn.txt");
     BufferedReader fileReader = new BufferedReader(new FileReader(synFile));
@@ -32,21 +30,16 @@ public class Action {
         proList.add(new Express(words[0], right[i]));
       }
       virSet.add(words[0]);
-
-      if (!firstMap.keySet().contains(words[0])) {
-        //加入该新非终结符的空first集
-        firstMap.put(words[0], new HashSet<String>());
-      }
-
+      
     }
   }
-
-
+ 
+  
   public void getFirst(String[] string) {
-
+    
   }
-
-
+  
+  
 
 
   /**
@@ -56,7 +49,7 @@ public class Action {
    */
   public boolean isVariable(String str) {
     for (Iterator<Express> iterator = proList.iterator(); iterator
-            .hasNext();) {
+        .hasNext();) {
       Express production = (Express) iterator.next();
       if (production.getLeft().equals(str)) {
         // 一旦找到左边有等于str的字符，就说明str不算终结符，返回真：是变量
@@ -74,7 +67,7 @@ public class Action {
    */
   public boolean isEmpty(String str) {
     for (Iterator<Express> iterator = proList.iterator(); iterator
-            .hasNext();) {
+        .hasNext();) {
       Express production = (Express) iterator.next();
       if (production.getLeft().equals(str)) {
         for (int i = 0; i < production.getRight().length; i++) {
@@ -97,7 +90,7 @@ public class Action {
   public List<Express> findLeft(String B) {
     List<Express> list = new ArrayList<>();
     for (Iterator<Express> iterator = proList.iterator(); iterator
-            .hasNext();) {
+        .hasNext();) {
       Express production = (Express) iterator.next();
       // System.out.println(production.getLeft());
       if (production.getLeft().equals(B)) {
@@ -154,14 +147,14 @@ public class Action {
     List<Express> productions = findLeft(str);
     System.out.println(productions);
     for (Iterator<Express> iterator = productions.iterator(); iterator
-            .hasNext();) {
+        .hasNext();) {
       Express production = (Express) iterator.next();
       if (isEmpty(production.getRight())) {
         System.out.println("-------------------null------------------");
         // 检查X->null是否成立
         list.add("null");
       } else if (!isVariable(production.getRight()[0])
-              && !isEmpty(production.getRight())) {
+          && !isEmpty(production.getRight())) {
         // 是终结符的话就直接加入。
         System.out.println("-------------------vict------------------");
         list.add(production.getRight()[0]);
@@ -172,24 +165,51 @@ public class Action {
     }
     return list;
   }
-
-
-
-
+  
+  
+  
+  
   public Set<Express> closure_method(Set<Express> project) {
+    for (Express express : project) {
+      //表示非归约状态
+      if (express.getIndex() < express.getRight().length) {
+        List<Express> avail = findLeft(express.getRight()[express.getIndex()]);
+        for (int i = 0; i < avail.size(); i++) {
+          Express add = avail.get(i);
+          add.setIndex(0);
+          List<String> first = getFirst(express.getRight()[express.getIndex()]+express.getHopingSymbols());
+          for (String hope : first) {
+            Set<String> hopeSet = new HashSet<String>();
+            hopeSet.add(hope);
+            add.setHopingSymbols(hopeSet);
+            project.add(add);
+          }
+        }
+      } else {
+        //归约状态直接返回
+        return project;
+      }
+    }
+    return project;
+  }
+  
+  public Set<Express> goto_method(Set<Express> project, String next) {
     Set<Express> jSet = new HashSet<Express>();
     for (Express express : project) {
-
+      Express newExp = new Express(express.getLeft(), express.getTail());
+      newExp.setIndex(express.getIndex()+1);
+      newExp.setHopingSymbols(newExp.getHopingSymbols());
     }
     return jSet;
   }
 
-  public Set<Express> goto_method(Set<Express> project) {
-    Set<Express> jSet = new HashSet<Express>();
-    for (Express express : project) {
 
-    }
-    return jSet;
+  public List<Express> getProList() {
+    return proList;
+  }
+
+  public Set<String> getVirSet() {
+    return virSet;
   }
 
 }
