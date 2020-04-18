@@ -230,7 +230,7 @@ public class Anaylser {
 
     public static void main(String[] args) throws IOException {
         Anaylser anaylser = new Anaylser();
-        anaylser.tokens = Arrays.asList(Arrays.asList("id"),Arrays.asList("="),Arrays.asList("id"),Arrays.asList("$"));
+        anaylser.tokens = Arrays.asList(Arrays.asList("int"),Arrays.asList("id"),Arrays.asList(";"),Arrays.asList("$"));
         anaylser.analyse();
     }
 }

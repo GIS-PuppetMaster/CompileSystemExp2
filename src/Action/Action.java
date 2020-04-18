@@ -191,38 +191,48 @@ public class Action {
         if (express.getIndex() < express.getRight().length) {
           List<Express> avail = findLeft(express.getRight()[express.getIndex()]);
           for (int i = 0; i < avail.size(); i++) {
-            Set<String> first = new HashSet<String>();
-            String check = null;
-            if (express.getIndex() < express.getRight().length - 1) {
-              check = express.getRight()[express.getIndex()+1]+" "+express.getHopingSymbols();
-            } else if (express.getIndex() == express.getRight().length - 1) {
-              check = express.getHopingSymbols();
+            //对于空产生式，直接add，且规定设置index为0
+            if (avail.get(i).getTail().contains("ε")) {
+              Express newExp = new Express(avail.get(i).getLeft(), avail.get(i).getTail());
+              newExp.setIndex(0);
+              newExp.setHopingSymbols(express.getHopingSymbols());
+              newAddSet.add(newExp);
             }
-            String[] wo = check.split("\\s");
-            for (int j = 0; j < wo.length; j++) {
-              String vir = wo[j];
-              int flag = 0;
-              if (virSet.contains(vir)) {
-                Set<String> addSet = getFirst(vir);
-                first.addAll(addSet);
-                if (addSet.contains("ε")) {
-                  flag = 1;
-                }
-              } else {
-                first.add(vir);
+            else {//非空产生式
+              Set<String> first = new HashSet<String>();
+              String check = null;
+              if (express.getIndex() < express.getRight().length - 1) {
+                check = express.getRight()[express.getIndex()+1]+" "+express.getHopingSymbols();
+              } else if (express.getIndex() == express.getRight().length - 1) {
+                check = express.getHopingSymbols();
               }
-              if (flag == 0) {
-                break;
+              String[] wo = check.split("\\s");
+              for (int j = 0; j < wo.length; j++) {
+                String vir = wo[j];
+                int flag = 0;
+                if (virSet.contains(vir)) {
+                  Set<String> addSet = getFirst(vir);
+                  first.addAll(addSet);
+                  if (addSet.contains("ε")) {
+                    flag = 1;
+                  }
+                } else {
+                  first.add(vir);
+                }
+                if (flag == 0) {
+                  break;
+                }
+              }
+              
+              for (String hope : first) {
+                Express newExp = new Express(avail.get(i).getLeft(), avail.get(i).getTail());
+                newExp.setIndex(0);
+                newExp.setHopingSymbols(hope);
+//                arrayList.add(newExp);
+                newAddSet.add(newExp);
               }
             }
             
-            for (String hope : first) {
-              Express newExp = new Express(avail.get(i).getLeft(), avail.get(i).getTail());
-              newExp.setIndex(0);
-              newExp.setHopingSymbols(hope);
-//              arrayList.add(newExp);
-              newAddSet.add(newExp);
-            }
           }
         } 
         //有一个归约产生式不代表其他也是归约
@@ -245,9 +255,10 @@ public class Action {
   public Set<Express> goto_method(Set<Express> project, String next) {
     Set<Express> jSet = new HashSet<Express>();
     for (Express express : project) {
-      //表示非归约状态
-      if (express.getIndex() < express.getRight().length) {
+      if (express.getIndex() < express.getRight().length && !express.getTail().contains("ε")) {
+        
         if (express.getRight()[express.getIndex()].equals(next)) {
+          
           Express newExp = new Express(express.getLeft(), express.getTail());
           newExp.setIndex(express.getIndex()+1);
           newExp.setHopingSymbols(express.getHopingSymbols());
