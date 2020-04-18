@@ -27,6 +27,7 @@ public class AnalysisFormat {
             }
         }
         characterSet.add("$");
+        characterSet.remove("ε");
         return characterSet;
     }
 
@@ -103,17 +104,17 @@ public class AnalysisFormat {
             for (Express express : expresses) {
                 String[] right = express.getRight();
                 // 条件为真则继续判断伪代码中第3、4个if
-                if (express.getIndex() == right.length) {
+                if (express.getIndex() == right.length || Arrays.asList(express.getRight()).contains("ε")) {
                     // 第一个非终结符
                     String S_ = action.getProList().get(0).getLeft();
                     // 用于获取表达式编号的实例，构造的不带展望符， index=0的实例
                     Express expressTemp = new Express(express.getLeft(), express.getTail());
-                    // 用于判读是否和第一个表达式相等，构造的不带展望符，index=0的实例
+                    // 用于判读是否和第一个表达式相等，构造的带展望符$，index=length的实例
                     Express expressTemp2 = new Express(action.getProList().get(0).getLeft(), action.getProList().get(0).getTail());
                     expressTemp2.setIndex(expressTemp2.getRight().length);
                     expressTemp2.setHopingSymbols("$");
                     // 伪代码中第三个if
-                    if (!express.getLeft().equals(S_)) {
+                    if (!express.getLeft().equals(S_) || Arrays.asList(express.getRight()).contains("ε")) {
                         format.get(inverseIndexMap.get(expresses)).put(express.getHopingSymbols(), new FormatElement(action.getProList().indexOf(expressTemp), "r"));
                     }
                     // 伪代码中第四个if
@@ -141,7 +142,6 @@ public class AnalysisFormat {
                     }
                 }
             }
-            indexCode++;
         }
         return new ArrayList<>() {{
             add(format);

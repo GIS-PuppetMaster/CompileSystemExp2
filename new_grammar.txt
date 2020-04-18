@@ -1,0 +1,6 @@
+Program -> P
+P -> D P 丨 ε
+D -> T id A ;
+T -> X
+X -> int 丨 float 丨 bool 丨 char
+A -> = ε
