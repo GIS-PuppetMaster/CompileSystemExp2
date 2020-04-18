@@ -33,19 +33,25 @@ public class Action {
     }
   }
   
-//  public static void main(String[] args) throws IOException {
-//    Action action = new Action();
-//    action.init();
-//    System.out.println(action.getFirst("ds"));
-//    for (String string : action.getVirSet()) {
-//      System.out.println(string);
-//      Set<String> re = action.getFirst(string);
-//      for (String s : re) {
-//        System.out.print(s+" ");
-//      }
-//      System.out.println();
-//    }
-//  }
+  public static void main(String[] args) throws IOException {
+    Action action = new Action();
+    action.init();
+    Set<Express> newAddSet  =new HashSet<Express>();
+    Express aExpress = new Express("Program","P");
+    aExpress.setHopingSymbols("$");
+    aExpress.setIndex(0);
+    newAddSet.add(aExpress);
+    action.closure_method(newAddSet);
+    System.out.println(action.getFirst("ds"));
+    for (String string : action.getVirSet()) {
+      System.out.println(string);
+      Set<String> re = action.getFirst(string);
+      for (String s : re) {
+        System.out.print(s+" ");
+      }
+      System.out.println();
+    }
+  }
 
   /**
    * 判断是不是终结符，如果左边没这个作为开头的，那就是终结符了。
@@ -181,13 +187,6 @@ public class Action {
   
   
   public Set<Express> closure_method(Set<Express> project) {
-//    ArrayList<Express> arrayList = new ArrayList<>(project);
-//    int size = arrayList.size();
-//    for (int index=0;;index++) {
-//      size = arrayList.size();
-//      if(index>=size){
-//        break;
-//      }
     int change = 0;
     Set<Express> newAddSet  =new HashSet<Express>();
     do {
@@ -199,18 +198,14 @@ public class Action {
         if (express.getIndex() < express.getRight().length) {
           List<Express> avail = findLeft(express.getRight()[express.getIndex()]);
           for (int i = 0; i < avail.size(); i++) {
-            //对于空产生式，直接add，且规定设置index为0
-            if (avail.get(i).getTail().contains("ε")) {
-              Express newExp = new Express(avail.get(i).getLeft(), avail.get(i).getTail());
-              newExp.setIndex(0);
-              newExp.setHopingSymbols(express.getHopingSymbols());
-              newAddSet.add(newExp);
-            }
-            else {//非空产生式
               Set<String> first = new HashSet<String>();
               String check = null;
               if (express.getIndex() < express.getRight().length - 1) {
-                check = express.getRight()[express.getIndex()+1]+" "+express.getHopingSymbols();
+                for (int j = express.getIndex()+1; j < express.getRight().length; j++) {
+                  check = express.getRight()[j]+" ";
+                }
+                check = check + express.getHopingSymbols();
+                
               } else if (express.getIndex() == express.getRight().length - 1) {
                 check = express.getHopingSymbols();
               }
@@ -237,10 +232,8 @@ public class Action {
                 Express newExp = new Express(avail.get(i).getLeft(), avail.get(i).getTail());
                 newExp.setIndex(0);
                 newExp.setHopingSymbols(hope);
-//                arrayList.add(newExp);
                 newAddSet.add(newExp);
               }
-            }
             
           }
         } 
