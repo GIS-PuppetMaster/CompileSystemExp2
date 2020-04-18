@@ -101,29 +101,39 @@ public class AnalysisFormat {
             //遍历表达式，构造分析表
             for (Express express : expresses) {
                 String[] right = express.getRight();
+                // 条件为真则继续判断伪代码中第3、4个if
                 if (express.getIndex() == right.length) {
-                    String last = String.valueOf(right[express.getIndex() - 1]);
+                    // 第一个非终结符
                     String S_ = action.getProList().get(0).getLeft();
+                    // 用于获取表达式编号的实例，构造的不带展望符， index=0的实例
                     Express expressTemp = new Express(express.getLeft(), express.getTail());
-                    // 构造一个acc状态
+                    // 用于判读是否和第一个表达式相等，构造的不带展望符，index=0的实例
                     Express expressTemp2 = new Express(action.getProList().get(0).getLeft(), action.getProList().get(0).getTail());
                     expressTemp2.setIndex(expressTemp2.getRight().length);
                     expressTemp2.setHopingSymbols("$");
+                    // 伪代码中第三个if
                     if (!express.getLeft().equals(S_)) {
                         format.get(inverseIndexMap.get(expresses)).put(express.getHopingSymbols(), new FormatElement(action.getProList().indexOf(expressTemp), "r"));
-                    } else if (express.equals(expressTemp2)) {
+                    }
+                    // 伪代码中第四个if
+                    else if (express.equals(expressTemp2)) {
                         format.get(inverseIndexMap.get(expresses)).put("$", new FormatElement(-1, "acc"));
                     }
-                } else {
+                }
+                // 伪代码中前两个if
+                else {
+                    // index后面的语法符号
                     String next = right[express.getIndex()];
-                    // 下一个语法符号为终结符
+                    // GOTO(Ii,a)=Ij
+                    Set<Express> exp = action.goto_method(expresses, next);
+                    // 伪代码中第一个if，下一个语法符号为终结符
                     if (!action.getVirSet().contains(next)) {
-                        Set<Express> exp = action.goto_method(expresses, next);
                         // 获取这个状态的编号
                         int j = inverseIndexMap.get(exp);
                         format.get(inverseIndexMap.get(expresses)).put(next, new FormatElement(j, "s"));
-                    } else {
-                        Set<Express> exp = action.goto_method(expresses, next);
+                    }
+                    // 伪代码中第二个if
+                    else {
                         // 获取这个状态的编号
                         int j = inverseIndexMap.get(exp);
                         format.get(inverseIndexMap.get(expresses)).put(next, new FormatElement(j, ""));
