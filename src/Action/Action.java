@@ -19,7 +19,7 @@ public class Action {
   Set<String> virSet = new HashSet<String>();
   
   public void init() throws IOException {
-    File synFile = new File("grammar.txt");
+    File synFile = new File("grammar1.txt");
     BufferedReader fileReader = new BufferedReader(new FileReader(synFile));
     String line = null;
     while ((line = fileReader.readLine()) != null) {
@@ -37,11 +37,11 @@ public class Action {
     Action action = new Action();
     action.init();
     Set<Express> newAddSet  =new HashSet<Express>();
-    Express aExpress = new Express("Program","P");
+    Express aExpress = new Express("Program","D");
     aExpress.setHopingSymbols("$");
     aExpress.setIndex(0);
     newAddSet.add(aExpress);
-    action.closure_method(newAddSet);
+    Set<Express> sdrf  = action.closure_method(newAddSet);
     System.out.println(action.getFirst("ds"));
     for (String string : action.getVirSet()) {
       System.out.println(string);
@@ -199,10 +199,10 @@ public class Action {
           List<Express> avail = findLeft(express.getRight()[express.getIndex()]);
           for (int i = 0; i < avail.size(); i++) {
               Set<String> first = new HashSet<String>();
-              String check = null;
+              String check = "";
               if (express.getIndex() < express.getRight().length - 1) {
                 for (int j = express.getIndex()+1; j < express.getRight().length; j++) {
-                  check = express.getRight()[j]+" ";
+                  check = check+ express.getRight()[j]+" ";
                 }
                 check = check + express.getHopingSymbols();
                 
