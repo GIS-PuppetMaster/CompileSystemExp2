@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.channels.NonReadableChannelException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -179,7 +180,25 @@ public class Action {
         for (int i = 0; i < avail.size(); i++) {
           Express add = avail.get(i);
           add.setIndex(0);
-          Set<String> first = getFirst(express.getRight()[express.getIndex()]+express.getHopingSymbols());
+          Set<String> first = new HashSet<String>();
+          String check = express.getRight()[express.getIndex()]+express.getHopingSymbols();
+          for (int j = 0; j < check.length(); j++) {
+            String vir = String.valueOf(check.charAt(j));
+            int flag = 0;
+            if (virSet.contains(vir)) {
+              Set<String> addSet = getFirst(vir);
+              first.addAll(addSet);
+              if (addSet.contains("ε")) {
+                flag = 1;
+              }
+            } else {
+              first.add(vir);
+            }
+            if (flag == 0) {
+              break;
+            }
+          }
+          
           for (String hope : first) {
             add.setHopingSymbols(hope);
             project.add(add);
