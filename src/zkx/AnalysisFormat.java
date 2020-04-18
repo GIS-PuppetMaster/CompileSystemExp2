@@ -4,6 +4,7 @@ package zkx;
 import Action.Action;
 import Action.Express;
 
+import java.sql.ClientInfoStatus;
 import java.util.*;
 
 
@@ -81,37 +82,36 @@ public class AnalysisFormat {
         for (Set<Express> expresses : C) {
             //遍历表达式，构造分析表
             for (Express express : expresses) {
-                for (String tail : express.getRight()) {
-                    if (express.getIndex() == tail.length()) {
-                        String last = String.valueOf(tail.toCharArray()[express.getIndex() - 1]);
-                        String S_ = action.getProList().get(0).getLeft();
-                        if (action.getVirSet().contains(last) && !express.getLeft().equals(S_)) {
-                            format.put(inverseIndexMap.get(expresses), new HashMap<>() {{
-                                put(express.getHopingSymbols(), new FormatElement(action.getProList().indexOf(express), "r"));
-                            }});
-                        } else if (!action.getVirSet().contains(last)) {
-                            format.put(inverseIndexMap.get(expresses), new HashMap<>() {{
-                                put("$", new FormatElement(-1, "acc"));
-                            }});
-                        }
-                    } else {
-                        String next = String.valueOf(tail.toCharArray()[express.getIndex()]);
-                        if (!action.getVirSet().contains(next)) {
-                            Set<Express> exp = action.goto_method(expresses, next);
-                            // 获取这个状态的编号
-                            int code = inverseIndexMap.get(exp);
-                            format.put(inverseIndexMap.get(expresses), new HashMap<>() {{
-                                put(next, new FormatElement(code, "s"));
-                            }});
-                        }
-                        else {
-                            Set<Express> exp = action.goto_method(expresses, next);
-                            // 获取这个状态的编号
-                            int code = inverseIndexMap.get(exp);
-                            format.put(inverseIndexMap.get(expresses), new HashMap<>() {{
-                                put(next, new FormatElement(code, ""));
-                            }});
-                        }
+                String[] right = express.getRight();
+                if (express.getIndex() == right.length) {
+                    String last = String.valueOf(right[express.getIndex() - 1]);
+                    String S_ = action.getProList().get(0).getLeft();
+                    if (action.getVirSet().contains(last) && !express.getLeft().equals(S_)) {
+                        format.put(inverseIndexMap.get(expresses), new HashMap<>() {{
+                            put(express.getHopingSymbols(), new FormatElement(action.getProList().indexOf(express), "r"));
+                        }});
+                    } else if (!action.getVirSet().contains(last)) {
+                        format.put(inverseIndexMap.get(expresses), new HashMap<>() {{
+                            put("$", new FormatElement(-1, "acc"));
+                        }});
+                    }
+                } else {
+                    String next = String.valueOf(right[express.getIndex()]);
+                    if (!action.getVirSet().contains(next)) {
+                        Set<Express> exp = action.goto_method(expresses, next);
+                        // 获取这个状态的编号
+                        int code = inverseIndexMap.get(exp);
+                        format.put(inverseIndexMap.get(expresses), new HashMap<>() {{
+                            put(next, new FormatElement(code, "s"));
+                        }});
+                    }
+                    else {
+                        Set<Express> exp = action.goto_method(expresses, next);
+                        // 获取这个状态的编号
+                        int code = inverseIndexMap.get(exp);
+                        format.put(inverseIndexMap.get(expresses), new HashMap<>() {{
+                            put(next, new FormatElement(code, ""));
+                        }});
                     }
                 }
             }
@@ -124,57 +124,69 @@ public class AnalysisFormat {
     }
 
     public void outputFormat(Map<Integer, Map<String, FormatElement>> format) {
-        System.out.println("State||                                         Action                                          ||                                         GOTO");
+        StringBuilder firstHead = new StringBuilder("State||Action||GOTO");
+
         Set<String> allSymbol = getSymbolSet();
         // 终结符
         List<String> finalSymbol = new ArrayList<>(getFinalSymbolSet());
         // 文法符号-终结符=非终结符
         allSymbol.removeAll(finalSymbol);
         List<String> notFinalSymbol = new ArrayList<>(allSymbol);
+        for(int i = 0;i<finalSymbol.size()*10-7;i++) {
+            firstHead.insert(13," ");
+        }
+
+        System.out.println(firstHead);
+        // 构造表头format
+        String formatHead = "    ";
+        for(int i = 0;i<finalSymbol.size();i++){
+            formatHead+="|{%5s}";
+        }
+        formatHead+="||";
+        for(int i = 0;i<notFinalSymbol.size();i++){
+            formatHead+="|{%5s}";
+        }
         // 输出表头
-        StringBuilder line = new StringBuilder("     || ");
+        StringBuilder line = new StringBuilder("     ||");
         for(String s:finalSymbol){
-            line.append(s).append(" | ");
+            line.append(String.format("%9s",s)).append("|");
         }
-        line.deleteCharAt(line.length() - 1);
-        line.insert(line.length(),"              ");
+        line.append("|");
         for(String s:notFinalSymbol){
-            line.append(s).append(" | ");
+            line.append(String.format("%9s",s)).append("|");
         }
-        line = new StringBuilder(line.substring(0, line.length() - 1));
         System.out.println(line);
-        line=new StringBuilder();
         // 遍历状态
         for (int state = 0; state < format.keySet().size(); state++) {
-            line.append(state).append("   ||");
+            line=new StringBuilder();
+            line.append(state).append("    ||");
             // 遍历Action的终结符
             for(String s:finalSymbol){
                 FormatElement formatElement = format.get(state).get(s);
                 if(formatElement==null){
-                    line.append("error|");
+                    line.append(String.format("%9s|",""));
                 }
                 else if("acc".equals(formatElement.info)){
-                    line.append(formatElement.info).append("|");
+                    line.append(String.format("%9s|","acc"));
                 }
-                else if("s".equals(formatElement.info)){
-                    line.append(formatElement.info).append(formatElement.targetState).append("|");
+                else if("s".equals(formatElement.info) || "r".equals(formatElement.info)){
+                    line.append(String.format("%9s|",formatElement.info+formatElement.targetState));
                 }
             }
-            line.deleteCharAt(line.length()-1);
+            line.append("|");
             // 遍历GOTO的非终结符
             for(String s:notFinalSymbol){
                 FormatElement formatElement = format.get(state).get(s);
                 if(formatElement==null){
-                    line.append("error|");
+                    line.append(String.format("%9s|",""));
                 }
                 else if("acc".equals(formatElement.info)){
-                    line.append(formatElement.info).append("|");
+                    line.append(String.format("%9s|","acc"));
                 }
-                else if("s".equals(formatElement.info)){
-                    line.append(formatElement.info).append(formatElement.targetState).append("|");
+                else if("s".equals(formatElement.info) || "r".equals(formatElement.info)){
+                    line.append(String.format("%9s|",formatElement.info+formatElement.targetState));
                 }
             }
-            line.deleteCharAt(line.length()-1);
             System.out.println(line);
         }
 
