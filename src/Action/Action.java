@@ -87,7 +87,7 @@ public class Action {
   /**
    * 返回包含这个左部的产生式集合，
    * @param B
-   *
+   * @param productions
    * @return
    */
   public List<Express> findLeft(String B) {
@@ -105,7 +105,7 @@ public class Action {
 
   /**
    * 获取非终结符号的产生式的first集合X->Y1Y2Y3Y4Y5……这样的,
-   * @param production X
+   * @param str X
    * @return
    */
   public List<String> getFirstItem(Express production) {
