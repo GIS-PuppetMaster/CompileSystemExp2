@@ -18,7 +18,7 @@ public class Action {
   Set<String> virSet = new HashSet<String>();
   
   public void init() throws IOException {
-    File synFile = new File("Test.txt");
+    File synFile = new File("grammar.txt");
     BufferedReader fileReader = new BufferedReader(new FileReader(synFile));
     String line = null;
     while ((line = fileReader.readLine()) != null) {

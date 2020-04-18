@@ -7,7 +7,7 @@ import java.util.Set;
 public class Express {
   String head;
   String tail;
-  int index;
+  int index=0;
   public int getIndex() {
     return index;
   }

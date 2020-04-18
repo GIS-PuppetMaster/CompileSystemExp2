@@ -40,9 +40,10 @@ public class AnalysisFormat {
     }
 
     public List<Object> items(List<Express> G) {
-        Express start = G.get(0);
+        Express tempStart = G.get(0);
+        Express start = new Express(tempStart.getLeft(), tempStart.getTail());
         start.setHopingSymbols("$");
-        boolean added = false;
+        boolean added;
         Set<Express> firstState = action.closure_method(new HashSet<>() {{
             add(start);
         }});
@@ -59,7 +60,9 @@ public class AnalysisFormat {
                     break;
                 }
                 Set<Express> set = arrayList.get(i);
-                for (String symbol : this.getSymbolSet()) {
+                Set<String> symbolSet = this.getSymbolSet();
+                symbolSet.remove("$");
+                for (String symbol : symbolSet) {
                     Set<Express> temp = action.goto_method(set, symbol);
                     if (!temp.isEmpty() && !arrayList.contains(temp)) {
                         Set<Set<Express>> tempSet = new HashSet<>(arrayList);
