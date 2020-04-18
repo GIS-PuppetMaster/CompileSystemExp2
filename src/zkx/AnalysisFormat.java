@@ -87,8 +87,9 @@ public class AnalysisFormat {
                     String last = String.valueOf(right[express.getIndex() - 1]);
                     String S_ = action.getProList().get(0).getLeft();
                     if (action.getVirSet().contains(last) && !express.getLeft().equals(S_)) {
+                        Express expressTemp = new Express(express.getLeft(), express.getTail());
                         format.put(inverseIndexMap.get(expresses), new HashMap<>() {{
-                            put(express.getHopingSymbols(), new FormatElement(action.getProList().indexOf(express), "r"));
+                            put(express.getHopingSymbols(), new FormatElement(action.getProList().indexOf(expressTemp), "r"));
                         }});
                     } else if (!action.getVirSet().contains(last)) {
                         format.put(inverseIndexMap.get(expresses), new HashMap<>() {{
@@ -158,7 +159,7 @@ public class AnalysisFormat {
         System.out.println(line);
         // 遍历状态
         for (int state = 0; state < format.keySet().size(); state++) {
-            line=new StringBuilder();
+            line = new StringBuilder();
             line.append(state).append("    ||");
             // 遍历Action的终结符
             for(String s:finalSymbol){
