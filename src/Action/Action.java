@@ -173,59 +173,66 @@ public class Action {
   
   
   public Set<Express> closure_method(Set<Express> project) {
-    ArrayList<Express> arrayList = new ArrayList<>(project);
-    int size = arrayList.size();
-    for (int index=0;;index++) {
-      size = arrayList.size();
-      if(index>=size){
-        break;
-      }
-      Express express = arrayList.get(index);
-      //表示非归约状态
-      if (express.getIndex() < express.getRight().length) {
-        List<Express> avail = findLeft(express.getRight()[express.getIndex()]);
-        for (int i = 0; i < avail.size(); i++) {
-//          Express add = avail.get(i);
-//          add.setIndex(0);
-          Set<String> first = new HashSet<String>();
-          String check = null;
-          if (express.getIndex() < express.getRight().length - 1) {
-            check = express.getRight()[express.getIndex()+1]+express.getHopingSymbols();
-          } else if (express.getIndex() == express.getRight().length - 1) {
-            check = express.getHopingSymbols();
-          }
-          
-          for (int j = 0; j < check.length(); j++) {
-            String vir = String.valueOf(check.charAt(j));
-            int flag = 0;
-            if (virSet.contains(vir)) {
-              Set<String> addSet = getFirst(vir);
-              first.addAll(addSet);
-              if (addSet.contains("ε")) {
-                flag = 1;
+//    ArrayList<Express> arrayList = new ArrayList<>(project);
+//    int size = arrayList.size();
+//    for (int index=0;;index++) {
+//      size = arrayList.size();
+//      if(index>=size){
+//        break;
+//      }
+    int change = 0;
+    Set<Express> newAddSet  =new HashSet<Express>();
+    do {
+      project.addAll(newAddSet);
+      newAddSet = new HashSet<Express>();
+      for (Express express : project) {
+//        Express express = arrayList.get(index);
+        //表示非归约状态
+        if (express.getIndex() < express.getRight().length) {
+          List<Express> avail = findLeft(express.getRight()[express.getIndex()]);
+          for (int i = 0; i < avail.size(); i++) {
+            Set<String> first = new HashSet<String>();
+            String check = null;
+            if (express.getIndex() < express.getRight().length - 1) {
+              check = express.getRight()[express.getIndex()+1]+express.getHopingSymbols();
+            } else if (express.getIndex() == express.getRight().length - 1) {
+              check = express.getHopingSymbols();
+            }
+            
+            for (int j = 0; j < check.length(); j++) {
+              String vir = String.valueOf(check.charAt(j));
+              int flag = 0;
+              if (virSet.contains(vir)) {
+                Set<String> addSet = getFirst(vir);
+                first.addAll(addSet);
+                if (addSet.contains("ε")) {
+                  flag = 1;
+                }
+              } else {
+                first.add(vir);
               }
-            } else {
-              first.add(vir);
+              if (flag == 0) {
+                break;
+              }
             }
-            if (flag == 0) {
-              break;
+            
+            for (String hope : first) {
+              Express newExp = new Express(avail.get(i).getLeft(), avail.get(i).getTail());
+              newExp.setIndex(0);
+              newExp.setHopingSymbols(hope);
+//              arrayList.add(newExp);
+              newAddSet.add(newExp);
             }
           }
-          
-          for (String hope : first) {
-//            add.setHopingSymbols(hope);
-            Express newExp = new Express(avail.get(i).getLeft(), avail.get(i).getTail());
-            newExp.setIndex(0);
-            newExp.setHopingSymbols(hope);
-            arrayList.add(newExp);
-          }
+        } else {
+          //归约状态直接返回
+          return project;
         }
-      } else {
-        //归约状态直接返回
-        return new HashSet<Express>(arrayList);
       }
-    }
-    return new HashSet<Express>(arrayList);
+//    }
+    } while (change == 1);
+//    return new HashSet<Express>(arrayList);
+    return project;
   }
   
   public Set<Express> goto_method(Set<Express> project, String next) {
