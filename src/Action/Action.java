@@ -173,7 +173,14 @@ public class Action {
   
   
   public Set<Express> closure_method(Set<Express> project) {
-    for (Express express : project) {
+    ArrayList<Express> arrayList = new ArrayList<>(project);
+    int size = arrayList.size();
+    for (int index=0;;index++) {
+      size = project.size();
+      if(index>=size){
+        break;
+      }
+      Express express = arrayList.get(index);
       //表示非归约状态
       if (express.getIndex() < express.getRight().length) {
         List<Express> avail = findLeft(express.getRight()[express.getIndex()]);
@@ -201,15 +208,15 @@ public class Action {
           
           for (String hope : first) {
             add.setHopingSymbols(hope);
-            project.add(add);
+            arrayList.add(add);
           }
         }
       } else {
         //归约状态直接返回
-        return project;
+        return new HashSet<Express>(arrayList);
       }
     }
-    return project;
+    return new HashSet<Express>(arrayList);
   }
   
   public Set<Express> goto_method(Set<Express> project, String next) {

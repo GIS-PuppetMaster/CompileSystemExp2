@@ -96,6 +96,14 @@ public class AnalysisFormat {
                                 put(next, new FormatElement(code, "s"));
                             }});
                         }
+                        else {
+                            Set<Express> exp = action.goto_method(expresses, next);
+                            // 获取这个状态的编号
+                            int code = inverseIndexMap.get(exp);
+                            format.put(inverseIndexMap.get(expresses), new HashMap<>() {{
+                                put(next, new FormatElement(code, ""));
+                            }});
+                        }
                     }
                 }
             }

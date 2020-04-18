@@ -10,5 +10,15 @@ public class FormatElement {
         this.targetState = targetState;
         this.info = info;
     }
+
+    @Override
+    public int hashCode() {
+        return (info+targetState).hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return info + targetState;
+    }
 }
 
