@@ -51,7 +51,7 @@ public class Anaylser {
             lrTable.put(item.getKey(),tmp);
         }
         System.out.println("Follow集：");
-        getFollow();
+        //getFollow();
     }
 
 
@@ -169,7 +169,7 @@ public class Anaylser {
     //计算非终结符follow集
     public void getFollow(){
         boolean flag ;
-        follow.put("S'", Arrays.asList("$"));
+        follow.put("Program", Arrays.asList("$"));
         while(true){
             flag = true;
             for(String nonterm:nonterminal){
@@ -230,7 +230,7 @@ public class Anaylser {
 
     public static void main(String[] args) throws IOException {
         Anaylser anaylser = new Anaylser();
-        anaylser.tokens = Arrays.asList(Arrays.asList("*"),Arrays.asList("*"),Arrays.asList("*"),Arrays.asList("id"),Arrays.asList("="),Arrays.asList("*"),Arrays.asList("id"),Arrays.asList("$"));
+        anaylser.tokens = Arrays.asList(Arrays.asList("int"),Arrays.asList("id"),Arrays.asList(";"),Arrays.asList("$"));
         anaylser.analyse();
     }
 }

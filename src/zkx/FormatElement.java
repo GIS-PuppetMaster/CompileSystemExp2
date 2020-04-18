@@ -21,10 +21,7 @@ public class FormatElement {
         if(targetState!=-1) {
             return info + targetState;
         }
-        if(info.equals("")){
-            return "";
-        }
-        else{
+        else {
             return info;
         }
     }

@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import zkx.AnalysisFormat;
 
 public class Action {
   //存储读入的文法表达式
@@ -18,7 +19,7 @@ public class Action {
   Set<String> virSet = new HashSet<String>();
   
   public void init() throws IOException {
-    File synFile = new File("Test.txt");
+    File synFile = new File("grammar1.txt");
     BufferedReader fileReader = new BufferedReader(new FileReader(synFile));
     String line = null;
     while ((line = fileReader.readLine()) != null) {
@@ -32,9 +33,16 @@ public class Action {
     }
   }
   
-  /*public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException {
     Action action = new Action();
     action.init();
+    Set<Express> newAddSet  =new HashSet<Express>();
+    Express aExpress = new Express("Program","D");
+    aExpress.setHopingSymbols("$");
+    aExpress.setIndex(0);
+    newAddSet.add(aExpress);
+    Set<Express> sdrf  = action.closure_method(newAddSet);
+    System.out.println(action.getFirst("ds"));
     for (String string : action.getVirSet()) {
       System.out.println(string);
       Set<String> re = action.getFirst(string);
@@ -43,7 +51,7 @@ public class Action {
       }
       System.out.println();
     }
-  }*/
+  }
 
   /**
    * 判断是不是终结符，如果左边没这个作为开头的，那就是终结符了。
@@ -149,6 +157,7 @@ public class Action {
     List<String> list = new ArrayList<>();
     List<Express> productions = findLeft(str);
 //    System.out.println(productions);
+    
     for (Iterator<Express> iterator = productions.iterator(); iterator
         .hasNext();) {
       Express production = (Express) iterator.next();
@@ -166,6 +175,11 @@ public class Action {
         list.addAll(getFirstItem(production));
       }
     }
+    
+    if (!virSet.contains(str)) {
+      list.add(str);
+      return new HashSet<String>(list);
+    }
     return new HashSet<String>(list);
   }
   
@@ -173,13 +187,6 @@ public class Action {
   
   
   public Set<Express> closure_method(Set<Express> project) {
-//    ArrayList<Express> arrayList = new ArrayList<>(project);
-//    int size = arrayList.size();
-//    for (int index=0;;index++) {
-//      size = arrayList.size();
-//      if(index>=size){
-//        break;
-//      }
     int change = 0;
     Set<Express> newAddSet  =new HashSet<Express>();
     do {
@@ -191,38 +198,43 @@ public class Action {
         if (express.getIndex() < express.getRight().length) {
           List<Express> avail = findLeft(express.getRight()[express.getIndex()]);
           for (int i = 0; i < avail.size(); i++) {
-            Set<String> first = new HashSet<String>();
-            String check = null;
-            if (express.getIndex() < express.getRight().length - 1) {
-              check = express.getRight()[express.getIndex()+1]+express.getHopingSymbols();
-            } else if (express.getIndex() == express.getRight().length - 1) {
-              check = express.getHopingSymbols();
-            }
-            
-            for (int j = 0; j < check.length(); j++) {
-              String vir = String.valueOf(check.charAt(j));
-              int flag = 0;
-              if (virSet.contains(vir)) {
-                Set<String> addSet = getFirst(vir);
-                first.addAll(addSet);
-                if (addSet.contains("ε")) {
-                  flag = 1;
+              Set<String> first = new HashSet<String>();
+              String check = "";
+              if (express.getIndex() < express.getRight().length - 1) {
+                for (int j = express.getIndex()+1; j < express.getRight().length; j++) {
+                  check = check+ express.getRight()[j]+" ";
                 }
-              } else {
-                first.add(vir);
+                check = check + express.getHopingSymbols();
+                
+              } else if (express.getIndex() == express.getRight().length - 1) {
+                check = express.getHopingSymbols();
               }
-              if (flag == 0) {
-                break;
+              String[] wo = check.split("\\s");
+              for (int j = 0; j < wo.length; j++) {
+                String vir = wo[j];
+                int flag = 0;
+                if (virSet.contains(vir)) {
+                  Set<String> addSet = getFirst(vir);
+                  first.addAll(addSet);
+                  if (addSet.contains("ε")) {
+                    flag = 1;
+                    first.remove("ε");
+                  }
+                } else {
+                  first.add(vir);
+                }
+                if (flag == 0) {
+                  break;
+                }
               }
-            }
+              
+              for (String hope : first) {
+                Express newExp = new Express(avail.get(i).getLeft(), avail.get(i).getTail());
+                newExp.setIndex(0);
+                newExp.setHopingSymbols(hope);
+                newAddSet.add(newExp);
+              }
             
-            for (String hope : first) {
-              Express newExp = new Express(avail.get(i).getLeft(), avail.get(i).getTail());
-              newExp.setIndex(0);
-              newExp.setHopingSymbols(hope);
-//              arrayList.add(newExp);
-              newAddSet.add(newExp);
-            }
           }
         } 
         //有一个归约产生式不代表其他也是归约
@@ -245,9 +257,10 @@ public class Action {
   public Set<Express> goto_method(Set<Express> project, String next) {
     Set<Express> jSet = new HashSet<Express>();
     for (Express express : project) {
-      //表示非归约状态
-      if (express.getIndex() < express.getRight().length) {
+      if (express.getIndex() < express.getRight().length && !express.getTail().contains("ε")) {
+        
         if (express.getRight()[express.getIndex()].equals(next)) {
+          
           Express newExp = new Express(express.getLeft(), express.getTail());
           newExp.setIndex(express.getIndex()+1);
           newExp.setHopingSymbols(express.getHopingSymbols());
