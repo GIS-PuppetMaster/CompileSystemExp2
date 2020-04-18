@@ -32,7 +32,7 @@ public class Action {
     }
   }
   
-  /*public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException {
     Action action = new Action();
     action.init();
     for (String string : action.getVirSet()) {
@@ -43,7 +43,7 @@ public class Action {
       }
       System.out.println();
     }
-  }*/
+  }
 
   /**
    * 判断是不是终结符，如果左边没这个作为开头的，那就是终结符了。
@@ -194,13 +194,13 @@ public class Action {
             Set<String> first = new HashSet<String>();
             String check = null;
             if (express.getIndex() < express.getRight().length - 1) {
-              check = express.getRight()[express.getIndex()+1]+express.getHopingSymbols();
+              check = express.getRight()[express.getIndex()+1]+" "+express.getHopingSymbols();
             } else if (express.getIndex() == express.getRight().length - 1) {
               check = express.getHopingSymbols();
             }
-            
-            for (int j = 0; j < check.length(); j++) {
-              String vir = String.valueOf(check.charAt(j));
+            String[] wo = check.split("\\s");
+            for (int j = 0; j < wo.length; j++) {
+              String vir = wo[j];
               int flag = 0;
               if (virSet.contains(vir)) {
                 Set<String> addSet = getFirst(vir);
