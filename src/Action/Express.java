@@ -43,4 +43,30 @@ public class Express {
     this.hopingSymbol = hopingSymbol;
     return;
   }
+  
+  //重写hashcode方法
+  @Override
+  public int hashCode() {
+      int result = head.hashCode();
+      result = 17 * result + tail.hashCode();
+      result = 17 * result + index + hopingSymbol.hashCode();
+      return result;
+  }
+
+  // 重写equals方法
+  @Override
+  public boolean equals(Object obj) {
+      if(!(obj instanceof Express)) {
+     // instanceof 已经处理了obj = null的情况
+          return false;
+      }
+      Express expObj = (Express) obj;
+      if (expObj.head.equals(this.head) && expObj.tail.equals(this.tail) && expObj.index == this.index && expObj.hopingSymbol.equals(this.hopingSymbol)) {
+          return true;
+      } else {
+          return false;
+      }
+  }
+  
+  
 }
