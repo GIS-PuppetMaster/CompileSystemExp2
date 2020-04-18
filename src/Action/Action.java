@@ -183,7 +183,7 @@ public class Action {
     int change = 0;
     Set<Express> newAddSet  =new HashSet<Express>();
     do {
-      project.addAll(newAddSet);
+      change = 0;
       newAddSet = new HashSet<Express>();
       for (Express express : project) {
 //        Express express = arrayList.get(index);
@@ -224,12 +224,19 @@ public class Action {
               newAddSet.add(newExp);
             }
           }
-        } else {
-          //归约状态直接返回
-          return project;
-        }
+        } 
+        //有一个归约产生式不代表其他也是归约
+//        else {
+//          //归约状态直接返回
+//          return project;
+//        }
       }
-//    }
+      int oldSize = project.size();
+      project.addAll(newAddSet);
+      int newSize = project.size();
+      if (newSize > oldSize) {
+        change = 1;
+      }
     } while (change == 1);
 //    return new HashSet<Express>(arrayList);
     return project;
