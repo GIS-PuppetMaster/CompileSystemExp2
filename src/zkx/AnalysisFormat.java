@@ -26,6 +26,7 @@ public class AnalysisFormat {
                 }
             }
         }
+        characterSet.add("$");
         return characterSet;
     }
     public Set<String> getSymbolSet() {
@@ -77,6 +78,7 @@ public class AnalysisFormat {
             //对状态进行编码
             indexMap.put(indexCode, expresses);
             inverseIndexMap.put(expresses, indexCode);
+            format.put(indexCode, new HashMap<>());
             indexCode++;
         }
         for (Set<Express> expresses : C) {
@@ -86,33 +88,30 @@ public class AnalysisFormat {
                 if (express.getIndex() == right.length) {
                     String last = String.valueOf(right[express.getIndex() - 1]);
                     String S_ = action.getProList().get(0).getLeft();
-                    if (action.getVirSet().contains(last) && !express.getLeft().equals(S_)) {
-                        Express expressTemp = new Express(express.getLeft(), express.getTail());
-                        format.put(inverseIndexMap.get(expresses), new HashMap<>() {{
-                            put(express.getHopingSymbols(), new FormatElement(action.getProList().indexOf(expressTemp), "r"));
-                        }});
-                    } else if (!action.getVirSet().contains(last)) {
-                        format.put(inverseIndexMap.get(expresses), new HashMap<>() {{
-                            put("$", new FormatElement(-1, "acc"));
-                        }});
+                    Express expressTemp = new Express(express.getLeft(), express.getTail());
+                    // 构造一个acc状态
+                    Express expressTemp2 = new Express(action.getProList().get(0).getLeft(), action.getProList().get(0).getTail());
+                    expressTemp2.setIndex(expressTemp2.getRight().length);
+                    expressTemp2.setHopingSymbols("$");
+                    if (!express.getLeft().equals(S_)) {
+                        format.get(inverseIndexMap.get(expresses)).put(express.getHopingSymbols(), new FormatElement(action.getProList().indexOf(expressTemp), "r"));
+                    } else if (express.equals(expressTemp2)) {
+                        format.get(inverseIndexMap.get(expresses)).put("$", new FormatElement(-1, "acc"));
                     }
                 } else {
-                    String next = String.valueOf(right[express.getIndex()]);
+                    String next = right[express.getIndex()];
+                    // 下一个语法符号为终结符
                     if (!action.getVirSet().contains(next)) {
                         Set<Express> exp = action.goto_method(expresses, next);
                         // 获取这个状态的编号
-                        int code = inverseIndexMap.get(exp);
-                        format.put(inverseIndexMap.get(expresses), new HashMap<>() {{
-                            put(next, new FormatElement(code, "s"));
-                        }});
+                        int j = inverseIndexMap.get(exp);
+                        format.get(inverseIndexMap.get(expresses)).put(next, new FormatElement(j, "s"));
                     }
                     else {
                         Set<Express> exp = action.goto_method(expresses, next);
                         // 获取这个状态的编号
-                        int code = inverseIndexMap.get(exp);
-                        format.put(inverseIndexMap.get(expresses), new HashMap<>() {{
-                            put(next, new FormatElement(code, ""));
-                        }});
+                        int j = inverseIndexMap.get(exp);
+                        format.get(inverseIndexMap.get(expresses)).put(next, new FormatElement(j, ""));
                     }
                 }
             }
@@ -160,11 +159,11 @@ public class AnalysisFormat {
         // 遍历状态
         for (int state = 0; state < format.keySet().size(); state++) {
             line = new StringBuilder();
-            line.append(state).append("    ||");
+            line.append(String.format("%5s||",state));
             // 遍历Action的终结符
             for(String s:finalSymbol){
                 FormatElement formatElement = format.get(state).get(s);
-                if(formatElement==null){
+                if(formatElement==null || "".equals(formatElement.info)){
                     line.append(String.format("%9s|",""));
                 }
                 else if("acc".equals(formatElement.info)){
@@ -186,6 +185,9 @@ public class AnalysisFormat {
                 }
                 else if("s".equals(formatElement.info) || "r".equals(formatElement.info)){
                     line.append(String.format("%9s|",formatElement.info+formatElement.targetState));
+                }
+                else if("".equals(formatElement.info)){
+                    line.append(String.format("%9s|",formatElement.targetState));
                 }
             }
             System.out.println(line);
