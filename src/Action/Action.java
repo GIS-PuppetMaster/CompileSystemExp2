@@ -188,7 +188,13 @@ public class Action {
           Express add = avail.get(i);
           add.setIndex(0);
           Set<String> first = new HashSet<String>();
-          String check = express.getRight()[express.getIndex()]+express.getHopingSymbols();
+          String check = null;
+          if (express.getIndex() < express.getRight().length - 1) {
+            check = express.getRight()[express.getIndex()+1]+express.getHopingSymbols();
+          } else if (express.getIndex() == express.getRight().length - 1) {
+            check = express.getHopingSymbols();
+          }
+          
           for (int j = 0; j < check.length(); j++) {
             String vir = String.valueOf(check.charAt(j));
             int flag = 0;
