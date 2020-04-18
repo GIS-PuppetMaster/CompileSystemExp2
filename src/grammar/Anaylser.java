@@ -99,6 +99,10 @@ public class Anaylser {
         }
         System.out.println("语法分析树输出：");
         outputResult();
+        System.out.println("错误信息：");
+        for(String s:errorMessage){
+            System.out.println(s);
+        }
     }
 
     public boolean handleInput(String symbol){
