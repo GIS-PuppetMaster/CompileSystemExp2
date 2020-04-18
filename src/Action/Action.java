@@ -149,6 +149,7 @@ public class Action {
     List<String> list = new ArrayList<>();
     List<Express> productions = findLeft(str);
 //    System.out.println(productions);
+    
     for (Iterator<Express> iterator = productions.iterator(); iterator
         .hasNext();) {
       Express production = (Express) iterator.next();
@@ -165,6 +166,11 @@ public class Action {
 //        System.out.println("-------------------set------------------");
         list.addAll(getFirstItem(production));
       }
+    }
+    
+    if (!virSet.contains(str)) {
+      list.add(str);
+      return new HashSet<String>(list);
     }
     return new HashSet<String>(list);
   }
