@@ -45,18 +45,25 @@ public class AnalysisFormat {
                 add(start);
             }}));
         }};
+        ArrayList<Set<Express>> arrayList = new ArrayList<>(C);
+        int size;
         do {
-            for (Set<Express> set : C) {
+            for(int i=0;;i++){
+                size = arrayList.size();
+                if(i>=size){
+                    break;
+                }
+                Set<Express> set = arrayList.get(i);
                 for (String symbol : this.getSymbolSet()) {
                     Set<Express> temp = action.goto_method(set, symbol);
                     if (!temp.isEmpty() && !C.contains(temp)) {
-                        C.add(temp);
+                        arrayList.add(temp);
                         added = true;
                     }
                 }
             }
         } while (added);
-        return C;
+        return new HashSet<>(arrayList);
     }
 
     public List<Object> buildFormat() {
