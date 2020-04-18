@@ -18,7 +18,15 @@ public class FormatElement {
 
     @Override
     public String toString() {
-        return info + targetState;
+        if(targetState!=-1) {
+            return info + targetState;
+        }
+        if(info.equals("")){
+            return "";
+        }
+        else{
+            return info;
+        }
     }
 }
 

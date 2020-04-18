@@ -165,14 +165,11 @@ public class AnalysisFormat {
             // 遍历Action的终结符
             for(String s:finalSymbol){
                 FormatElement formatElement = format.get(state).get(s);
-                if(formatElement==null || "".equals(formatElement.info)){
+                if(formatElement==null){
                     line.append(String.format("%9s|",""));
                 }
-                else if("acc".equals(formatElement.info)){
-                    line.append(String.format("%9s|","acc"));
-                }
-                else if("s".equals(formatElement.info) || "r".equals(formatElement.info)){
-                    line.append(String.format("%9s|",formatElement.info+formatElement.targetState));
+                else{
+                    line.append(String.format("%9s|", formatElement));
                 }
             }
             line.append("|");
@@ -182,14 +179,8 @@ public class AnalysisFormat {
                 if(formatElement==null){
                     line.append(String.format("%9s|",""));
                 }
-                else if("acc".equals(formatElement.info)){
-                    line.append(String.format("%9s|","acc"));
-                }
-                else if("s".equals(formatElement.info) || "r".equals(formatElement.info)){
-                    line.append(String.format("%9s|",formatElement.info+formatElement.targetState));
-                }
-                else if("".equals(formatElement.info)){
-                    line.append(String.format("%9s|",formatElement.targetState));
+                else{
+                    line.append(String.format("%9s|", formatElement));
                 }
             }
             System.out.println(line);
