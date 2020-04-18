@@ -236,7 +236,7 @@ public class Action {
         if (express.getRight()[express.getIndex()].equals(next)) {
           Express newExp = new Express(express.getLeft(), express.getTail());
           newExp.setIndex(express.getIndex()+1);
-          newExp.setHopingSymbols(newExp.getHopingSymbols());
+          newExp.setHopingSymbols(express.getHopingSymbols());
           jSet.add(newExp);
         }
       }
