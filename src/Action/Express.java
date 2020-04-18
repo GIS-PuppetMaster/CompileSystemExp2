@@ -14,7 +14,7 @@ public class Express {
     this.index = index;
   }
   String[] tailStrings;
-  String hopingSymbol;
+  String hopingSymbol = "";
   public Express(String head, String tail) {
     this.head = head;
     this.tail = tail;
