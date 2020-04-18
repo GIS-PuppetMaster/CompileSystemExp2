@@ -185,8 +185,8 @@ public class Action {
       if (express.getIndex() < express.getRight().length) {
         List<Express> avail = findLeft(express.getRight()[express.getIndex()]);
         for (int i = 0; i < avail.size(); i++) {
-          Express add = avail.get(i);
-          add.setIndex(0);
+//          Express add = avail.get(i);
+//          add.setIndex(0);
           Set<String> first = new HashSet<String>();
           String check = null;
           if (express.getIndex() < express.getRight().length - 1) {
@@ -213,8 +213,11 @@ public class Action {
           }
           
           for (String hope : first) {
-            add.setHopingSymbols(hope);
-            arrayList.add(add);
+//            add.setHopingSymbols(hope);
+            Express newExp = new Express(avail.get(i).getLeft(), avail.get(i).getTail());
+            newExp.setIndex(0);
+            newExp.setHopingSymbols(hope);
+            arrayList.add(newExp);
           }
         }
       } else {
