@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import zkx.AnalysisFormat;
 
 public class Action {
   //存储读入的文法表达式
@@ -32,18 +33,19 @@ public class Action {
     }
   }
   
-  public static void main(String[] args) throws IOException {
-    Action action = new Action();
-    action.init();
-    for (String string : action.getVirSet()) {
-      System.out.println(string);
-      Set<String> re = action.getFirst(string);
-      for (String s : re) {
-        System.out.print(s+" ");
-      }
-      System.out.println();
-    }
-  }
+//  public static void main(String[] args) throws IOException {
+//    Action action = new Action();
+//    action.init();
+//    System.out.println(action.getFirst("ds"));
+//    for (String string : action.getVirSet()) {
+//      System.out.println(string);
+//      Set<String> re = action.getFirst(string);
+//      for (String s : re) {
+//        System.out.print(s+" ");
+//      }
+//      System.out.println();
+//    }
+//  }
 
   /**
    * 判断是不是终结符，如果左边没这个作为开头的，那就是终结符了。
@@ -221,6 +223,7 @@ public class Action {
                   first.addAll(addSet);
                   if (addSet.contains("ε")) {
                     flag = 1;
+                    first.remove("ε");
                   }
                 } else {
                   first.add(vir);
