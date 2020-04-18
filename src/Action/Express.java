@@ -1,5 +1,6 @@
 package Action;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -67,6 +68,14 @@ public class Express {
           return false;
       }
   }
-  
-  
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(head+"->");
+        for(String s:tailStrings){
+            sb.append(s+" ");
+        }
+        return sb.toString();
+    }
 }

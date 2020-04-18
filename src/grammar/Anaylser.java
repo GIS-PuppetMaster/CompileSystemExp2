@@ -51,7 +51,7 @@ public class Anaylser {
             lrTable.put(item.getKey(),tmp);
         }
         System.out.println("Follow集：");
-        this.getFollow();
+        //getFollow();
     }
 
 
@@ -83,16 +83,18 @@ public class Anaylser {
         if(action == null){
             handleError();
         }
+        //移入
         else if(action.matches("s[0-9]+")){
             statusStack.add(Integer.valueOf(action.substring(1)));
             symbolStack.add(symbol);
             this.tokenIndex++;
         }
+        //归约
         else if(action.matches("r[0-9]+")){
             Express prod = this.productions.get(Integer.valueOf(action.substring(1)));
             String left = prod.getLeft();
             List<String> right = Arrays.asList(prod.getRight());
-            if(right.contains("empty")){
+            if(right.contains("ε")){
 
             }else{
                 for(int i=0;i<right.size();i++){
@@ -229,6 +231,6 @@ public class Anaylser {
     public static void main(String[] args) throws IOException {
         Anaylser anaylser = new Anaylser();
         anaylser.tokens = Arrays.asList(Arrays.asList("id"),Arrays.asList("="),Arrays.asList("id"),Arrays.asList("$"));
-        //anaylser.analyse();
+        anaylser.analyse();
     }
 }

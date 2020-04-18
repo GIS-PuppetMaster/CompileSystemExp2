@@ -18,7 +18,7 @@ public class Action {
   Set<String> virSet = new HashSet<String>();
   
   public void init() throws IOException {
-    File synFile = new File("gammar.txt");
+    File synFile = new File("Test.txt");
     BufferedReader fileReader = new BufferedReader(new FileReader(synFile));
     String line = null;
     while ((line = fileReader.readLine()) != null) {
@@ -266,5 +266,6 @@ public class Action {
   public Set<String> getVirSet() {
     return virSet;
   }
+
 
 }
