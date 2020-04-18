@@ -18,7 +18,7 @@ public class Action {
   Set<String> virSet = new HashSet<String>();
   
   public void init() throws IOException {
-    File synFile = new File("grammar.txt");
+    File synFile = new File("Test.txt");
     BufferedReader fileReader = new BufferedReader(new FileReader(synFile));
     String line = null;
     while ((line = fileReader.readLine()) != null) {
@@ -32,7 +32,7 @@ public class Action {
     }
   }
   
-  public static void main(String[] args) throws IOException {
+  /*public static void main(String[] args) throws IOException {
     Action action = new Action();
     action.init();
     for (String string : action.getVirSet()) {
@@ -43,7 +43,7 @@ public class Action {
       }
       System.out.println();
     }
-  }
+  }*/
 
   /**
    * 判断是不是终结符，如果左边没这个作为开头的，那就是终结符了。
