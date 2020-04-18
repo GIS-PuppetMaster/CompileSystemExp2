@@ -60,7 +60,9 @@ public class AnalysisFormat {
                 for (String symbol : this.getSymbolSet()) {
                     Set<Express> temp = action.goto_method(set, symbol);
                     if (!temp.isEmpty() && !arrayList.contains(temp)) {
-                        added = arrayList.add(temp);
+                        Set<Set<Express>> tempSet = new HashSet<>(arrayList);
+                        added = tempSet.add(temp);
+                        arrayList = new ArrayList<>(tempSet);
                     }
                 }
             }
