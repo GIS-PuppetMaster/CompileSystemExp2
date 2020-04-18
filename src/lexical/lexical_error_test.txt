@@ -1,0 +1,23 @@
+/* This is the error test program */
+/* Lexical error */
+
+/* Character lacks a semicolon */
+char m = ';
+char n = 'a ;    
+
+/* Wrong hex */
+int a = 0x ;    
+int b = 0x0;
+
+/* Wrong constant format */
+int c = 9.;
+int d = 9E;
+int e = 9E+;
+int f = 1.0E-;   
+
+/* Wrong operator */
+m ** n;
+m *+ n;
+
+/* error note format test1*
+/* error note format test2 

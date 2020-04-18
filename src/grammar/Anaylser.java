@@ -2,6 +2,8 @@ package grammar;
 
 import Action.Action;
 import Action.Express;
+
+import lexical.LexicalAnalyzer;
 import zkx.AnalysisFormat;
 import zkx.FormatElement;
 
@@ -21,6 +23,8 @@ public class Anaylser {
     public List<Express> reduceDetail = new ArrayList<>();//执行栈信息
     public Map<String, List<String>> follow = new HashMap<>();//非终结符的follow集
     Action action;
+    public List<String> errorMessage = new ArrayList<>();//错误信息
+    public Map<Integer,String> errorCases = new HashMap<>();//错误提示
 
     public void init() throws IOException {
         //清空栈
@@ -30,8 +34,13 @@ public class Anaylser {
         while(!symbolStack.empty()){
             symbolStack.pop();
         }
-
-        //初始化产生式集合，非终结符集合，分析表
+        //获取token
+        String testFilePath = "src/grammar/test.txt";
+        LexicalAnalyzer l = new LexicalAnalyzer(testFilePath);
+        l.scanner();
+        tokens = l.getTokens();
+        tokens.add(Arrays.asList("$","_","0"));
+        //初始化产生式集合，非终结符集合，分析表，follow集
         action = new Action();
         action.init();
         AnalysisFormat analysisFormat = new AnalysisFormat(action);
@@ -51,7 +60,23 @@ public class Anaylser {
             lrTable.put(item.getKey(),tmp);
         }
         System.out.println("Follow集：");
-        //getFollow();
+        getFollow();
+        //初始化错误提示
+        errorCases.put(26,"[ Missing '{' ]");
+        errorCases.put(6,"[ Missing variable ]");
+        errorCases.put(156,"[ Missing ';' ]");
+        errorCases.put(35,"[ Missing ';' ]");
+        errorCases.put(220,"[ Missing ';' ]");
+        errorCases.put(133,"[ Missing ')' ]");
+        errorCases.put(36,"[ Missing '(' ]");
+        errorCases.put(20,"[ Missing '(' ]");
+        errorCases.put(204,"[ Loop structure error ]");
+        errorCases.put(158,"[ Boolean expression error ]");
+        errorCases.put(54,"[ Missing valuable ]");
+        errorCases.put(25,"[ Missing ; ]");
+        errorCases.put(69,"[ Missing do ]");
+
+
     }
 
 
@@ -107,8 +132,11 @@ public class Anaylser {
 
             //归约后的goto
             int currentStatus = statusStack.peek();
-            statusStack.add(Integer.valueOf(lrTable.get(currentStatus).get(left).substring(0)));
-            //handleInput(left);
+            if(lrTable.get(currentStatus).get(left)!=null) {
+                statusStack.add(Integer.valueOf(lrTable.get(currentStatus).get(left).substring(0)));
+            }else{
+                handleError();
+            }
         }
         else if(action.equals("acc")){
             System.out.println("识别成功");
@@ -126,7 +154,69 @@ public class Anaylser {
 
     //处理错误
     public void handleError(){
+        //恐慌模式，退回到能接受非终结符D的状态,并丢掉不能跟在非终结符D后面的输入。
+        int currStatus = statusStack.peek();
+        String lineNumber = tokens.get(tokenIndex).get(2);
+        errorMessage.add("行数："+tokens.get(tokenIndex).get(2)+" 错误状态："+String.valueOf(currStatus));
 
+        List<Integer> statusList = new ArrayList<>(statusStack);
+        for(int i=statusList.size()-1;i>=0;i--){
+            String goAction = lrTable.get(statusList.get(i)).get("D");
+            if(goAction == null){
+                //若该状态无对应D的状态转移，则弹出
+                if(statusStack.peek() == 0) break;
+                statusStack.pop();
+                symbolStack.pop();
+            }else{
+                //若该状态有对应D的状态转移，则分情况处理
+                //非特殊处理的状态
+                //压入D以及跳转的状态
+                if(currStatus!=2 && currStatus!=104){
+                    int targetStatus = Integer.valueOf(goAction);
+                    symbolStack.push("D");
+                    statusStack.push(Integer.valueOf(goAction));
+                }else{
+                    //状态为2和104时，上述过程会陷入死循环，所以将前面的非初始状态全部弹出并压入D
+                    while(true){
+                        if(statusStack.peek()!=0){
+                            statusStack.pop();
+                            symbolStack.pop();
+                        }else{
+                            symbolStack.push("D");
+                            statusStack.push(Integer.valueOf(lrTable.get(0).get("D")));
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        //抛弃所有不在follow(D)中的token
+        while(!follow.get("D").contains(tokens.get(tokenIndex).get(0)) ){
+            tokenIndex++;
+        }
+        //特殊情况：}，代表一个程序块的结束，直接将所有非初始状态都弹出，压入D
+        if(tokens.get(tokenIndex).get(0).equals("}")){
+            while(true){
+                if(statusStack.peek()!=0){
+                    statusStack.pop();
+                    symbolStack.pop();
+                }else{
+                    symbolStack.push("D");
+                    statusStack.push(Integer.valueOf(lrTable.get(0).get("D")));
+                    break;
+                }
+            }
+            tokenIndex++;
+        }
+
+        //查找错误识别信息
+        if(errorCases.get(currStatus) != null) {
+            errorMessage.add("Error at Line " + lineNumber + ": " + errorCases.get(currStatus));
+        } else {
+            // 识别不到的语法错误
+            errorMessage.add("Error at Line " + lineNumber + ": " + "[ Error ]");
+        }
     }
 
     //输出词法分析树
@@ -230,7 +320,7 @@ public class Anaylser {
 
     public static void main(String[] args) throws IOException {
         Anaylser anaylser = new Anaylser();
-        anaylser.tokens = Arrays.asList(Arrays.asList("int"),Arrays.asList("id"),Arrays.asList(";"),Arrays.asList("$"));
+        //anaylser.tokens = Arrays.asList(Arrays.asList("int"),Arrays.asList("id"),Arrays.asList(";"),Arrays.asList("$"));
         anaylser.analyse();
     }
 }
