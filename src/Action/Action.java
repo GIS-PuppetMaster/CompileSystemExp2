@@ -215,11 +215,14 @@ public class Action {
   public Set<Express> goto_method(Set<Express> project, String next) {
     Set<Express> jSet = new HashSet<Express>();
     for (Express express : project) {
-      Express newExp = new Express(express.getLeft(), express.getTail());
-      newExp.setIndex(express.getIndex()+1);
-      newExp.setHopingSymbols(newExp.getHopingSymbols());
+      if (express.getRight()[express.getIndex()].equals(next)) {
+        Express newExp = new Express(express.getLeft(), express.getTail());
+        newExp.setIndex(express.getIndex()+1);
+        newExp.setHopingSymbols(newExp.getHopingSymbols());
+        jSet.add(express);
+      }
     }
-    return jSet;
+    return closure_method(jSet);
   }
 
 
