@@ -176,7 +176,7 @@ public class Action {
     ArrayList<Express> arrayList = new ArrayList<>(project);
     int size = arrayList.size();
     for (int index=0;;index++) {
-      size = project.size();
+      size = arrayList.size();
       if(index>=size){
         break;
       }
