@@ -48,6 +48,7 @@ public class AnalysisFormat {
         ArrayList<Set<Express>> arrayList = new ArrayList<>(C);
         int size;
         do {
+            added=false;
             for(int i=0;;i++){
                 size = arrayList.size();
                 if(i>=size){
@@ -56,9 +57,8 @@ public class AnalysisFormat {
                 Set<Express> set = arrayList.get(i);
                 for (String symbol : this.getSymbolSet()) {
                     Set<Express> temp = action.goto_method(set, symbol);
-                    if (!temp.isEmpty() && !C.contains(temp)) {
-                        arrayList.add(temp);
-                        added = true;
+                    if (!temp.isEmpty() && !arrayList.contains(temp)) {
+                        added = arrayList.add(temp);
                     }
                 }
             }
@@ -76,6 +76,7 @@ public class AnalysisFormat {
             //对状态进行编码
             indexMap.put(indexCode, expresses);
             inverseIndexMap.put(expresses, indexCode);
+            indexCode++;
         }
         for (Set<Express> expresses : C) {
             //遍历表达式，构造分析表
