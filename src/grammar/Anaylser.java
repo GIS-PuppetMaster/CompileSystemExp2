@@ -65,19 +65,35 @@ public class Anaylser {
         System.out.println("Follow集：");
         getFollow();
         //初始化错误提示
-        errorCases.put(26,"[ Missing '{' ]");
+        /*errorCases.put(26,"[ Missing '{' ]");
         errorCases.put(6,"[ Missing variable ]");
         errorCases.put(156,"[ Missing ';' ]");
         errorCases.put(35,"[ Missing ';' ]");
         errorCases.put(220,"[ Missing ';' ]");
         errorCases.put(133,"[ Missing ')' ]");
         errorCases.put(36,"[ Missing '(' ]");
-        errorCases.put(20,"[ Missing '(' ]");
+        errorCases.put(271,"[ Missing ')' ]");
         errorCases.put(204,"[ Loop structure error ]");
         errorCases.put(158,"[ Boolean expression error ]");
         errorCases.put(54,"[ Missing valuable ]");
         errorCases.put(25,"[ Missing ; ]");
+        errorCases.put(69,"[ Missing do ]");*/
+
         errorCases.put(69,"[ Missing do ]");
+        errorCases.put(272,"[ Missing variable ]");
+        errorCases.put(293,"[ Missing ';' ]");
+        errorCases.put(197,"[ Missing ';' ]");
+        errorCases.put(32,"[ Missing then ]");
+        errorCases.put(221,"[ Missing variable ]");
+        errorCases.put(81,"[ Missing variable ]");
+        errorCases.put(156,"[ Missing ( ]");
+        errorCases.put(29,"[ Missing ) ]");
+        errorCases.put(271,"[ Missing ) ]");
+        errorCases.put(269,"[ Missing {\\} ]");
+        errorCases.put(18,"[ Missing {\\} ]");
+        errorCases.put(93,"[ Missing variable ]");
+
+
 
 
     }
@@ -225,7 +241,9 @@ public class Anaylser {
         }
 
         //查找错误识别信息
-        if(errorCases.get(currStatus) != null) {
+        if(currStatus==0){
+            errorMessage.add("Error at Line " + lineNumber + ": " + "[ Missing } ]"+"\n");
+        }else if(errorCases.get(currStatus) != null) {
             errorMessage.add("Error at Line " + lineNumber + ": " + errorCases.get(currStatus)+"\n");
         } else {
             // 识别不到的语法错误

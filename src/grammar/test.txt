@@ -1,12 +1,2 @@
-int m,z=0x12
-int i
-proc int getSum(int x,int y
-   int j = x;
-   int k = y;
-   return j+k;
-}
-call getSum1,2);
-do m = 1 while(m>2);
-if(m<8)  	
-m = m +1;  
-else m = m*2;
+struct a
+int a;}
