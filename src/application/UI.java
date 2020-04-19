@@ -26,14 +26,13 @@ public class UI {
     private JTextArea textArea2;
     private JTextArea textArea3;
     private JTextArea textArea4;
-    private static Anaylser anaylser;
+    private Anaylser anaylser;
 
     private String faPath;
     //private GramAnaylser anaylser;
 
 
     public static void main(String[] args) throws IOException {
-        UI.anaylser = new Anaylser();
         JFrame frame = new JFrame("UI");
         frame.setContentPane(new UI().panel1);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -44,12 +43,6 @@ public class UI {
 
     public UI() {
 
-        {
-            AnalysisFormat analysisFormat = new AnalysisFormat(anaylser.action);
-            List<Object> list = analysisFormat.buildFormat();
-            Map<Integer, Map<String, FormatElement>> format = (Map<Integer, Map<String, FormatElement>>) list.get(0);
-            textArea4.setText(analysisFormat.outputFormat(format));
-        }
         //词法分析
         Button3.addMouseListener(new MouseAdapter() {
             @Override
@@ -66,14 +59,21 @@ public class UI {
                 //String res = dfa.parse("code.txt");
                 //System.out.println(res);
                 //textArea1.setText(res);
-                anaylser.errorMessage = new ArrayList<>();
-                anaylser.reduceDetail = new ArrayList<Express>();
-                anaylser.outputGramTree = new ArrayList<>();
+                try {
+                    anaylser = new Anaylser();
+                } catch (IOException ioException) {
+                    ioException.printStackTrace();
+                }
                 anaylser.analyse();
                 List<String> errorMessage = anaylser.errorMessage;
                 List<Express> reduceDetail = anaylser.reduceDetail;
                 Map<Integer,Map<String,String>> lrTable = anaylser.lrTable;
                 List<String> outputGramTree = anaylser.outputGramTree;
+
+                AnalysisFormat analysisFormat = new AnalysisFormat(anaylser.action);
+                List<Object> list = analysisFormat.buildFormat();
+                Map<Integer, Map<String, FormatElement>> format = (Map<Integer, Map<String, FormatElement>>) list.get(0);
+                textArea4.setText(analysisFormat.outputFormat(format));
 
                 StringBuilder sb = new StringBuilder();
                 for(String s:errorMessage){

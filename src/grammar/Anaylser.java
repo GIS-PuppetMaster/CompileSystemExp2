@@ -236,8 +236,9 @@ public class Anaylser {
     //输出词法分析树
     public void outputResult(){
         System.out.println("P");
-        outputGramTree.add("P\n");
-        outputRight(reduceDetail.size()-1,2);
+        if(reduceDetail.size()>0)
+            outputGramTree.add("P\n");
+            outputRight(reduceDetail.size()-1,2);
     }
 
     public void outputRight(int root, int indent){
