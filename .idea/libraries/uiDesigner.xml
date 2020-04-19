@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="uiDesigner">
+    <CLASSES>
+      <root url="jar://$APPLICATION_HOME_DIR$/plugins/uiDesigner/lib/uiDesigner.jar!/" />
+      <root url="jar://$APPLICATION_HOME_DIR$/plugins/uiDesigner/lib/jps/ui-designer-jps-plugin.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

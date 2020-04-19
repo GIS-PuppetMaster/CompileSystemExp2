@@ -149,9 +149,9 @@ public class AnalysisFormat {
         }};
     }
 
-    public void outputFormat(Map<Integer, Map<String, FormatElement>> format) {
+    public String outputFormat(Map<Integer, Map<String, FormatElement>> format) {
         StringBuilder firstHead = new StringBuilder("State||Action||GOTO");
-
+        StringBuilder output = new StringBuilder();
         Set<String> allSymbol = getSymbolSet();
         // 终结符
         List<String> finalSymbol = new ArrayList<>(getFinalSymbolSet());
@@ -163,6 +163,7 @@ public class AnalysisFormat {
         }
 
         System.out.println(firstHead);
+        output.append(firstHead+"\n");
         // 构造表头format
         String formatHead = "    ";
         for (int i = 0; i < finalSymbol.size(); i++) {
@@ -206,7 +207,9 @@ public class AnalysisFormat {
                 }
             }
             System.out.println(line);
+            output.append(line+"\n");
         }
 
+        return output.toString();
     }
 }
