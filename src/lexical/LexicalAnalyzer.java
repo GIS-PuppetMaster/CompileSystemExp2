@@ -97,7 +97,7 @@ public class LexicalAnalyzer {
             } else if(end_state == 7 || end_state == 11) {
               output = str + "\t" + "< " + "CONST" + ", " + str + " >";
               
-              token.add("digit");
+              token.add("num");
               token.add(str);
               token.add(String.valueOf(line_number));
             } else {
@@ -174,7 +174,7 @@ public class LexicalAnalyzer {
             output = str + "\t" + "< " + "CONST" + ", " + str + " >";
             tokenMessage.add(output);
             
-            token.add("digit");
+            token.add("num");
             token.add(str);
             token.add(String.valueOf(line_number));
           } else {
@@ -186,7 +186,7 @@ public class LexicalAnalyzer {
           output = str + "\t" + "< " + "CONST" + ", " + str + " >";
           tokenMessage.add(output);
           
-          token.add("digit");
+          token.add("num");
           token.add(str);
           token.add(String.valueOf(line_number));
           break;
@@ -199,7 +199,7 @@ public class LexicalAnalyzer {
             output = str + "\t" + "< " + "CONST" + ", " + str + " >";
             tokenMessage.add(output);
             
-            token.add("digit");
+            token.add("num");
             token.add(str);
             token.add(String.valueOf(line_number));
           }
@@ -208,7 +208,7 @@ public class LexicalAnalyzer {
           output = str + "\t" + "< " + "CONST" + ", " + str + " >";
           tokenMessage.add(output);
           
-          token.add("digit");
+          token.add("num");
           token.add(str);
           token.add(String.valueOf(line_number));
           break;
@@ -223,7 +223,7 @@ public class LexicalAnalyzer {
             output = str + "\t" + "< " + "CONST" + ", " + str + " >";
             tokenMessage.add(output);
             
-            token.add("digit");
+            token.add("num");
             token.add(str);
             token.add(String.valueOf(line_number));
           }
@@ -237,7 +237,7 @@ public class LexicalAnalyzer {
             output = str + "\t" + "< " + "CONST" + ", " + str + " >";
             tokenMessage.add(output);
             
-            token.add("digit");
+            token.add("num");
             token.add(str);
             token.add(String.valueOf(line_number));
           }
@@ -247,7 +247,7 @@ public class LexicalAnalyzer {
             output = str + "\t" + "< " + "CONST" + ", " + str + " >";
             tokenMessage.add(output);
             
-            token.add("digit");
+            token.add("num");
             token.add(str);
             token.add(String.valueOf(line_number));
           } else {
@@ -260,7 +260,7 @@ public class LexicalAnalyzer {
             output = str + "\t" + "< " + "CONST" + ", " + str + " >";
             tokenMessage.add(output);
             
-            token.add("digit");
+            token.add("num");
             token.add(str);
             token.add(String.valueOf(line_number));
           } else {
@@ -273,7 +273,7 @@ public class LexicalAnalyzer {
             output = str + "\t" + "< " + "CONST" + ", " + str + " >";
             tokenMessage.add(output);
             
-            token.add("digit");
+            token.add("num");
             token.add(str);
             token.add(String.valueOf(line_number));
           } else {
@@ -285,7 +285,7 @@ public class LexicalAnalyzer {
           output = str + "\t" + "< " + "CONST" + ", " + str +" >";
           tokenMessage.add(output);
           
-          token.add("digit");
+          token.add("num");
           token.add(str);
           token.add(String.valueOf(line_number));
           break;
