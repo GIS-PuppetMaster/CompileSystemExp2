@@ -1,3 +1,1 @@
-if ( m < 8 )
-then m = m + 1 ;
-else m =m * 2 ;
+int a=1;
