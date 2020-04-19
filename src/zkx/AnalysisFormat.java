@@ -183,6 +183,7 @@ public class AnalysisFormat {
             line.append(String.format("%9s", s)).append("|");
         }
         System.out.println(line);
+        output.append(line+"\n");
         // 遍历状态
         for (int state = 0; state < format.keySet().size(); state++) {
             line = new StringBuilder();
