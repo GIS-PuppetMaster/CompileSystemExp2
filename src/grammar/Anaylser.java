@@ -226,10 +226,10 @@ public class Anaylser {
 
         //查找错误识别信息
         if(errorCases.get(currStatus) != null) {
-            errorMessage.add("Error at Line " + lineNumber + ": " + errorCases.get(currStatus));
+            errorMessage.add("Error at Line " + lineNumber + ": " + errorCases.get(currStatus)+"\n");
         } else {
             // 识别不到的语法错误
-            errorMessage.add("Error at Line " + lineNumber + ": " + "[ Error ]");
+            errorMessage.add("Error at Line " + lineNumber + ": " + "[ Error ]"+"\n");
         }
     }
 

@@ -1,15 +1,1 @@
-int m,z=0x12;   
-m = 2+3*4;      
-int[2][4] h;    
-int[3] a;       
-a[0] = 2;       
-if(m<8)  	
-then m = m +1;  
-else m = m*2;
-int i;
-proc int getSum(int x,int y){
-   int j = x;
-   int k = y;
-   return j+k;
-}
-call getSum(1,2);
+int ;

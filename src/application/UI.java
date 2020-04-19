@@ -12,6 +12,7 @@ import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -65,6 +66,9 @@ public class UI {
                 //String res = dfa.parse("code.txt");
                 //System.out.println(res);
                 //textArea1.setText(res);
+                anaylser.errorMessage = new ArrayList<>();
+                anaylser.reduceDetail = new ArrayList<Express>();
+                anaylser.outputGramTree = new ArrayList<>();
                 anaylser.analyse();
                 List<String> errorMessage = anaylser.errorMessage;
                 List<Express> reduceDetail = anaylser.reduceDetail;
