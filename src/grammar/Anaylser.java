@@ -22,9 +22,10 @@ public class Anaylser {
     public Stack<String> symbolStack = new Stack<String>();//符号栈
     public List<Express> reduceDetail = new ArrayList<>();//执行栈信息
     public Map<String, List<String>> follow = new HashMap<>();//非终结符的follow集
-    Action action;
+    public Action action;
     public List<String> errorMessage = new ArrayList<>();//错误信息
     public Map<Integer,String> errorCases = new HashMap<>();//错误提示
+    public List<String> outputGramTree = new ArrayList<>();//词法分析树
 
     public void init() throws IOException {
         //清空栈
@@ -34,17 +35,14 @@ public class Anaylser {
         while(!symbolStack.empty()){
             symbolStack.pop();
         }
+
         //获取token
         String testFilePath = "src/grammar/test.txt";
         LexicalAnalyzer l = new LexicalAnalyzer(testFilePath);
         l.scanner();
         tokens = l.getTokens();
         tokens.add(Arrays.asList("$","_","0"));
-//        tokens.add(Arrays.asList("char","_","0"));
-//        tokens.add(Arrays.asList("a","_","0"));
-//        tokens.add(Arrays.asList("=","_","0"));
-//        tokens.add(Arrays.asList("character","_","0"));
-//        tokens.add(Arrays.asList("$","_","0"));
+
         //初始化产生式集合，非终结符集合，分析表，follow集
         action = new Action();
         action.init();
@@ -92,6 +90,13 @@ public class Anaylser {
 
     //LR分析
     public void analyse(){
+        //获取token
+        String testFilePath = "src/grammar/test.txt";
+        LexicalAnalyzer l = new LexicalAnalyzer(testFilePath);
+        l.scanner();
+        tokens = l.getTokens();
+        tokens.add(Arrays.asList("$","_","0"));
+
         statusStack.push(0);
         symbolStack.push("#");
         while(this.tokenIndex<tokens.size()){
@@ -166,7 +171,7 @@ public class Anaylser {
         //恐慌模式，退回到能接受非终结符D的状态,并丢掉不能跟在非终结符D后面的输入。
         int currStatus = statusStack.peek();
         String lineNumber = tokens.get(tokenIndex).get(2);
-        errorMessage.add("行数："+tokens.get(tokenIndex).get(2)+" 错误状态："+String.valueOf(currStatus));
+        errorMessage.add("行数："+tokens.get(tokenIndex).get(2)+" 错误状态："+String.valueOf(currStatus)+"\n");
 
         List<Integer> statusList = new ArrayList<>(statusStack);
         for(int i=statusList.size()-1;i>=0;i--){
@@ -231,6 +236,7 @@ public class Anaylser {
     //输出词法分析树
     public void outputResult(){
         System.out.println("P");
+        outputGramTree.add("P\n");
         outputRight(reduceDetail.size()-1,2);
     }
 
@@ -242,6 +248,7 @@ public class Anaylser {
         for(int i=0;i<right.size();i++){
             String r = right.get(i);
             System.out.println(new String(new char[indent]).replace("\0"," ")+r);
+            outputGramTree.add(new String(new char[indent]).replace("\0"," ")+r+"\n");
             //终结符直接输出
             if(!nonterminal.contains(r)){
                 continue;
