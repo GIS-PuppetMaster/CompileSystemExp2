@@ -300,7 +300,7 @@ public class LexicalAnalyzer {
             output = str + "\t" + "< " + "CONST" + ", " + str +" >";
             tokenMessage.add(output);
             
-            token.add("CONST");
+            token.add("character");
             token.add(str);
             token.add(String.valueOf(line_number));
           } else {
@@ -312,7 +312,7 @@ public class LexicalAnalyzer {
           output = str + "\t" + "< " + "CONST" + ", " + str +" >";
           tokenMessage.add(output);
           
-          token.add("CONST");
+          token.add("character");
           token.add(str);
           token.add(String.valueOf(line_number));
           break;

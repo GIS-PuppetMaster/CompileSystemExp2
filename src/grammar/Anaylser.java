@@ -40,6 +40,11 @@ public class Anaylser {
         l.scanner();
         tokens = l.getTokens();
         tokens.add(Arrays.asList("$","_","0"));
+//        tokens.add(Arrays.asList("char","_","0"));
+//        tokens.add(Arrays.asList("a","_","0"));
+//        tokens.add(Arrays.asList("=","_","0"));
+//        tokens.add(Arrays.asList("character","_","0"));
+//        tokens.add(Arrays.asList("$","_","0"));
         //初始化产生式集合，非终结符集合，分析表，follow集
         action = new Action();
         action.init();
