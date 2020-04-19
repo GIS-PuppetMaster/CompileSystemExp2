@@ -1,2 +1,1 @@
-proc int a (int a)
-{
+int i = 0;
