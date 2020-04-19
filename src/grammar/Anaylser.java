@@ -62,8 +62,9 @@ public class Anaylser {
             }
             lrTable.put(item.getKey(),tmp);
         }
-        System.out.println("Follow集：");
         getFollow();
+        printFollowSet();
+        printFirstSet();
         //初始化错误提示
         errorCases.put(26,"[ Missing '{' ]");
         errorCases.put(6,"[ Missing variable ]");
@@ -81,8 +82,29 @@ public class Anaylser {
 
 
     }
+    public void printFollowSet(){
+        System.out.println("Follow集：");
+        for (Map.Entry<String, List<String>> entry:follow.entrySet()){
+            StringBuilder line= new StringBuilder(entry.getKey() + ":   ");
+            for(String s:entry.getValue()){
+                line.append(s).append(" ");
+            }
+            line.append("\n");
+            System.out.println(line);
+        }
+    }
 
-
+    public void printFirstSet(){
+        System.out.println("First集：");
+        for (String string : action.getVirSet()) {
+            System.out.print(string+":  ");
+            Set<String> re = action.getFirst(string);
+            for (String s : re) {
+                System.out.print(s+" ");
+            }
+            System.out.println();
+        }
+    }
     //初始化
     public Anaylser() throws IOException {
         init();
