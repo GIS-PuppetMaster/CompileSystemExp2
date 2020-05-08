@@ -20,6 +20,7 @@ public class Anaylser {
     public Map<Integer, Map<String,String>> lrTable = new HashMap();//分析表
     public Stack<Integer> statusStack = new Stack<Integer>();//状态栈
     public Stack<String> symbolStack = new Stack<String>();//符号栈
+    public Stack<Map<String, String>> valueStack = new Stack<>();//属性栈
     public List<Express> reduceDetail = new ArrayList<>();//执行栈信息
     public Map<String, List<String>> follow = new HashMap<>();//非终结符的follow集
     public Action action;
@@ -129,7 +130,7 @@ public class Anaylser {
     //LR分析
     public void analyse(){
         //获取token
-        String testFilePath = "src/grammar/test.txt";
+        String testFilePath = "src/grammar/new_grammar.txt";
         LexicalAnalyzer l = new LexicalAnalyzer(testFilePath);
         l.scanner();
         tokens = l.getTokens();
@@ -137,6 +138,7 @@ public class Anaylser {
 
         statusStack.push(0);
         symbolStack.push("#");
+        valueStack.push(null);
         while(this.tokenIndex<tokens.size()){
             List<String> currentToken = this.tokens.get(tokenIndex);
             handleInput(currentToken.get(0));
@@ -156,6 +158,8 @@ public class Anaylser {
     public boolean handleInput(String symbol){
         int status = this.statusStack.peek();
         String action = this.lrTable.get(status).get(symbol);
+        int offset = 0;
+        Map<String, List<String>> symbolTable = new HashMap<>();
         //错误处理, 策略：恐慌模式
         if(action == null){
             handleError();
@@ -177,6 +181,11 @@ public class Anaylser {
                 for(int i=0;i<right.size();i++){
                     statusStack.pop();
                     symbolStack.pop();
+                    String tail = prod.getTail();
+                    if("D".equals(left) && "T id;".equals(tail)){
+                        //symbolTable.put(symbol, Arrays.asList(valueStack,""));
+                    }
+
                 }
             }
             reduceDetail.add(prod);
