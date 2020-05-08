@@ -27,6 +27,7 @@ public class Anaylser {
     public List<String> errorMessage = new ArrayList<>();//错误信息
     public Map<Integer, String> errorCases = new HashMap<>();//错误提示
     public List<String> outputGramTree = new ArrayList<>();//词法分析树
+    Map<String, List<String>> symbolTable = new HashMap<>();//符号表
     int offset = 0;
     String t = null;
     String w = null;
@@ -165,7 +166,6 @@ public class Anaylser {
         int status = this.statusStack.peek();
         String action = this.lrTable.get(status).get(symbol);
 
-        Map<String, List<String>> symbolTable = new HashMap<>();
         //错误处理, 策略：恐慌模式
         if (action == null) {
             handleError();
@@ -181,7 +181,7 @@ public class Anaylser {
         }
         //归约
         else if (action.matches("r[0-9]+")) {
-            Express prod = this.productions.get(Integer.valueOf(action.substring(1)));
+            Express prod = this.productions.get(Integer.parseInt(action.substring(1)));
             String left = prod.getLeft();
             List<String> right = Arrays.asList(prod.getRight());
             if (right.contains("ε")) {
