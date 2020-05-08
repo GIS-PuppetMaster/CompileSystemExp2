@@ -17,7 +17,7 @@ public class Anaylser {
     public Integer tokenIndex = 0;//记录扫描到第几个token
     public Set<String> nonterminal = new HashSet<String>();//非终结符集合
     public List<Express> productions = new ArrayList<>();//产出式集合
-    public Map<Integer, Map<String,String>> lrTable = new HashMap();//分析表
+    public Map<Integer, Map<String, String>> lrTable = new HashMap();//分析表
     public Stack<Integer> statusStack = new Stack<Integer>();//状态栈
     public Stack<String> symbolStack = new Stack<String>();//符号栈
     public Stack<Map<String, String>> valueStack = new Stack<>();//属性栈
@@ -25,15 +25,18 @@ public class Anaylser {
     public Map<String, List<String>> follow = new HashMap<>();//非终结符的follow集
     public Action action;
     public List<String> errorMessage = new ArrayList<>();//错误信息
-    public Map<Integer,String> errorCases = new HashMap<>();//错误提示
+    public Map<Integer, String> errorCases = new HashMap<>();//错误提示
     public List<String> outputGramTree = new ArrayList<>();//词法分析树
+    int offset = 0;
+    String t = null;
+    String w = null;
 
     public void init() throws IOException {
         //清空栈
-        while(!statusStack.empty()) {
+        while (!statusStack.empty()) {
             statusStack.pop();
         }
-        while(!symbolStack.empty()){
+        while (!symbolStack.empty()) {
             symbolStack.pop();
         }
 
@@ -42,7 +45,7 @@ public class Anaylser {
         LexicalAnalyzer l = new LexicalAnalyzer(testFilePath);
         l.scanner();
         tokens = l.getTokens();
-        tokens.add(Arrays.asList("$","_","0"));
+        tokens.add(Arrays.asList("$", "_", "0"));
 
         //初始化产生式集合，非终结符集合，分析表，follow集
         action = new Action();
@@ -55,13 +58,13 @@ public class Anaylser {
 
         nonterminal = action.getVirSet();
         productions = action.getProList();
-        for(Map.Entry<Integer,Map<String,FormatElement>> item:format.entrySet()){
-            Map<String,String> tmp = new HashMap<>();
+        for (Map.Entry<Integer, Map<String, FormatElement>> item : format.entrySet()) {
+            Map<String, String> tmp = new HashMap<>();
             Map<String, FormatElement> itemMap = item.getValue();
-            for(Map.Entry<String,FormatElement> itemEntry:itemMap.entrySet()){
-                tmp.put(itemEntry.getKey(),itemEntry.getValue().toString());
+            for (Map.Entry<String, FormatElement> itemEntry : itemMap.entrySet()) {
+                tmp.put(itemEntry.getKey(), itemEntry.getValue().toString());
             }
-            lrTable.put(item.getKey(),tmp);
+            lrTable.put(item.getKey(), tmp);
         }
         getFollow();
         printFollowSet();
@@ -81,29 +84,28 @@ public class Anaylser {
         errorCases.put(25,"[ Missing ; ]");
         errorCases.put(69,"[ Missing do ]");*/
 
-        errorCases.put(69,"[ Missing do ]");
-        errorCases.put(272,"[ Missing variable ]");
-        errorCases.put(293,"[ Missing ';' ]");
-        errorCases.put(197,"[ Missing ';' ]");
-        errorCases.put(32,"[ Missing then ]");
-        errorCases.put(221,"[ Missing variable ]");
-        errorCases.put(81,"[ Missing variable ]");
-        errorCases.put(156,"[ Missing ( ]");
-        errorCases.put(29,"[ Missing ) ]");
-        errorCases.put(271,"[ Missing ) ]");
-        errorCases.put(269,"[ Missing {\\} ]");
-        errorCases.put(18,"[ Missing { ]");
-        errorCases.put(93,"[ Missing variable ]");
-
-
+        errorCases.put(69, "[ Missing do ]");
+        errorCases.put(272, "[ Missing variable ]");
+        errorCases.put(293, "[ Missing ';' ]");
+        errorCases.put(197, "[ Missing ';' ]");
+        errorCases.put(32, "[ Missing then ]");
+        errorCases.put(221, "[ Missing variable ]");
+        errorCases.put(81, "[ Missing variable ]");
+        errorCases.put(156, "[ Missing ( ]");
+        errorCases.put(29, "[ Missing ) ]");
+        errorCases.put(271, "[ Missing ) ]");
+        errorCases.put(269, "[ Missing {\\} ]");
+        errorCases.put(18, "[ Missing {\\} ]");
+        errorCases.put(93, "[ Missing variable ]");
 
 
     }
-    public void printFollowSet(){
+
+    public void printFollowSet() {
         System.out.println("Follow集：");
-        for (Map.Entry<String, List<String>> entry:follow.entrySet()){
-            StringBuilder line= new StringBuilder(entry.getKey() + ":   ");
-            for(String s:entry.getValue()){
+        for (Map.Entry<String, List<String>> entry : follow.entrySet()) {
+            StringBuilder line = new StringBuilder(entry.getKey() + ":   ");
+            for (String s : entry.getValue()) {
                 line.append(s).append(" ");
             }
             line.append("\n");
@@ -111,114 +113,173 @@ public class Anaylser {
         }
     }
 
-    public void printFirstSet(){
+    public void printFirstSet() {
         System.out.println("First集：");
         for (String string : action.getVirSet()) {
-            System.out.print(string+":  ");
+            System.out.print(string + ":  ");
             Set<String> re = action.getFirst(string);
             for (String s : re) {
-                System.out.print(s+" ");
+                System.out.print(s + " ");
             }
             System.out.println();
         }
     }
+
     //初始化
     public Anaylser() throws IOException {
         init();
     }
 
     //LR分析
-    public void analyse(){
+    public void analyse() {
         //获取token
         String testFilePath = "src/grammar/new_grammar.txt";
         LexicalAnalyzer l = new LexicalAnalyzer(testFilePath);
         l.scanner();
         tokens = l.getTokens();
-        tokens.add(Arrays.asList("$","_","0"));
+        tokens.add(Arrays.asList("$", "_", "0"));
 
         statusStack.push(0);
         symbolStack.push("#");
         valueStack.push(null);
-        while(this.tokenIndex<tokens.size()){
+        while (this.tokenIndex < tokens.size()) {
             List<String> currentToken = this.tokens.get(tokenIndex);
             handleInput(currentToken);
         }
         System.out.println("规约信息:");
-        for(Express s:reduceDetail){
+        for (Express s : reduceDetail) {
             System.out.println(s);
         }
         System.out.println("语法分析树输出：");
         outputResult();
         System.out.println("错误信息：");
-        for(String s:errorMessage){
+        for (String s : errorMessage) {
             System.out.println(s);
         }
     }
 
-    public boolean handleInput(List<String> token){
+    public boolean handleInput(List<String> token) {
         String symbol = token.get(0);
         String lexeme = token.get(1);
         String line = token.get(2);
         int status = this.statusStack.peek();
         String action = this.lrTable.get(status).get(symbol);
-        int offset = 0;
+
         Map<String, List<String>> symbolTable = new HashMap<>();
         //错误处理, 策略：恐慌模式
-        if(action == null){
+        if (action == null) {
             handleError();
         }
         //移入
-        else if(action.matches("s[0-9]+")){
+        else if (action.matches("s[0-9]+")) {
             statusStack.add(Integer.valueOf(action.substring(1)));
             symbolStack.add(symbol);
-            valueStack.add(new HashMap<>(){{put("lexeme", lexeme);}});
+            valueStack.add(new HashMap<>() {{
+                put("lexeme", lexeme);
+            }});
             this.tokenIndex++;
         }
         //归约
-        else if(action.matches("r[0-9]+")){
+        else if (action.matches("r[0-9]+")) {
             Express prod = this.productions.get(Integer.valueOf(action.substring(1)));
             String left = prod.getLeft();
             List<String> right = Arrays.asList(prod.getRight());
-            if(right.contains("ε")){
+            if (right.contains("ε")) {
                 String tail = prod.getTail();
-                if("DM1".equals(left) && "ε".equals(tail)) {
-                    // 将DM1.type赋值，先出栈再入栈
-                    Map<String,String> DM1_v = valueStack.pop();
+                if ("DM1".equals(left) && "ε".equals(tail)) {
+                    // 将DM1.type赋值
+                    Map<String, String> DM1_v = new HashMap<>();
                     DM1_v.put("type", "record");
                     // 获取id.lexeme，先出栈再入栈
-                    Map<String,String> id_v = valueStack.pop();
+                    Map<String, String> id_v = valueStack.pop();
                     String id_lexeme = id_v.get("lexeme");
                     // 入栈还原状态，注意DM1在栈顶
                     valueStack.add(id_v);
+                    // DM1在属性栈顶
                     valueStack.add(DM1_v);
                     // 添加符号表
-                    symbolTable.put(id_lexeme,Arrays.asList("record", String.valueOf(offset), line));
-                }
-                else if("DM1".equals(left) && "ε".equals(tail)) {
-                    // 将DM1.type赋值，先出栈再入栈
-                    Map<String,String> DM1_v = valueStack.pop();
-                    DM1_v.put("type", "record");
+                    symbolTable.put(id_lexeme, Arrays.asList("record", String.valueOf(offset), line));
+                } else if ("DM2".equals(left) && "ε".equals(tail)) {
+                    // 将DM1.type赋值
+                    Map<String, String> DM2_v = new HashMap<>();
+                    DM2_v.put("type", "proc");
                     // 获取id.lexeme，先出栈再入栈
-                    Map<String,String> id_v = valueStack.pop();
+                    Map<String, String> id_v = valueStack.pop();
                     String id_lexeme = id_v.get("lexeme");
-                    // 入栈还原状态，注意DM1在栈顶
+                    // 入栈还原状态，注意DM2在栈顶
                     valueStack.add(id_v);
-                    valueStack.add(DM1_v);
+                    valueStack.add(DM2_v);
                     // 添加符号表
-                    symbolTable.put(id_lexeme,Arrays.asList("record", String.valueOf(offset), line));
+                    symbolTable.put(id_lexeme, Arrays.asList("proc", String.valueOf(offset), line));
+                } else if ("TM".equals(left) && "ε".equals(tail)) {
+                    // 栈顶必定为X
+                    Map<String, String> x_v = valueStack.pop();
+                    t = x_v.get("type");
+                    w = x_v.get("width");
+                    // 放回x
+                    valueStack.add(x_v);
+                } else if ("C".equals(left) && "ε".equals(tail)) {
+                    valueStack.add(new HashMap<>() {{
+                        put("type", t);
+                        put("width", w);
+                    }});
                 }
-            }else{
+            } else {
                 List<String> symbolList = new ArrayList<>();
-                List<Map<String,String>> valueList = new ArrayList<>();
-                for(int i=0;i<right.size();i++){
+                List<Map<String, String>> valueList = new ArrayList<>();
+                for (int i = 0; i < right.size(); i++) {
                     statusStack.pop();
                     symbolList.add(symbolStack.pop());
                     valueList.add(valueStack.pop());
                 }
                 String tail = prod.getTail();
-                if("D".equals(left) && "T id;".equals(tail)){
-                    symbolTable.put(valueList.get(1).get("lexeme"), Arrays.asList(valueList.get(2).get("type"), String.valueOf(offset),line));
+                if ("D".equals(left) && "T id ;".equals(tail)) {
+                    symbolTable.put(valueList.get(1).get("lexeme"), Arrays.asList(valueList.get(2).get("type"), String.valueOf(offset), line));
                     offset += Integer.parseInt(valueList.get(2).get("width"));
+                } else if ("T".equals(left) && "X TM C".equals(tail)) {
+                    // 为后面压栈的T先压入属性
+                    valueStack.add(new HashMap<>() {{
+                        put("type", valueList.get(0).get("type"));
+                        put("width", valueList.get(0).get("width"));
+                    }});
+                } else if ("X".equals(left)) {
+                    if ("int".equals(tail)) {
+                        valueStack.add(new HashMap<>() {{
+                            put("type", "int");
+                            put("width", "4");
+                        }});
+                    } else if ("float".equals(tail)) {
+                        valueStack.add(new HashMap<>() {{
+                            put("type", "float");
+                            put("width", "8");
+                        }});
+                    } else if ("char".equals(tail)) {
+                        valueStack.add(new HashMap<>() {{
+                            put("type", "char");
+                            put("width", "1");
+                        }});
+                    }
+                } else if ("C".equals(left) && "[ num ] C".equals(tail)) {
+                    int val = Integer.parseInt(valueList.get(2).get("val"));
+                    int c1_width = Integer.parseInt(valueList.get(0).get("width"));
+                    valueStack.add(new HashMap<>() {{
+                        put("type", String.format("array({%d}, {%s});", val, valueList.get(0).get("type")));
+                        put("width", String.valueOf(val * c1_width));
+                    }});
+                } else if ("M".equals(left)) {
+                    symbolTable.put(valueList.get(0).get("lexeme"), Arrays.asList(valueList.get(1).get("type"), String.valueOf(offset), line));
+                    offset += Integer.parseInt(valueList.get(1).get("width"));
+                    if ("M , X id".equals(tail)) {
+                        valueStack.add(new HashMap<>() {{
+                            put("size", String.valueOf(Integer.parseInt(valueList.get(3).get("size")) + 1));
+                        }});
+                    } else if ("X id".equals(tail)) {
+                        valueStack.add(new HashMap<>() {{
+                            put("size", "1");
+                        }});
+                    }
+                } else if("S".equals(left) && "L = E ;".equals(tail)){
+
                 }
             }
             reduceDetail.add(prod);
@@ -226,13 +287,12 @@ public class Anaylser {
 
             //归约后的goto
             int currentStatus = statusStack.peek();
-            if(lrTable.get(currentStatus).get(left)!=null) {
+            if (lrTable.get(currentStatus).get(left) != null) {
                 statusStack.add(Integer.valueOf(lrTable.get(currentStatus).get(left).substring(0)));
-            }else{
+            } else {
                 handleError();
             }
-        }
-        else if(action.equals("acc")){
+        } else if (action.equals("acc")) {
             System.out.println("识别成功");
             this.tokenIndex++;
             return true;
@@ -242,40 +302,40 @@ public class Anaylser {
     }
 
     //打印栈内信息
-    public void printStack(){
+    public void printStack() {
         System.out.println(String.format("%-90s", this.statusStack) + String.format("%-90s", this.symbolStack));
     }
 
     //处理错误
-    public void handleError(){
+    public void handleError() {
         //恐慌模式，退回到能接受非终结符D的状态,并丢掉不能跟在非终结符D后面的输入。
         int currStatus = statusStack.peek();
         String lineNumber = tokens.get(tokenIndex).get(2);
-        errorMessage.add("行数："+tokens.get(tokenIndex).get(2)+" 错误状态："+String.valueOf(currStatus)+"\n");
+        errorMessage.add("行数：" + tokens.get(tokenIndex).get(2) + " 错误状态：" + String.valueOf(currStatus) + "\n");
 
         List<Integer> statusList = new ArrayList<>(statusStack);
-        for(int i=statusList.size()-1;i>=0;i--){
+        for (int i = statusList.size() - 1; i >= 0; i--) {
             String goAction = lrTable.get(statusList.get(i)).get("D");
-            if(goAction == null){
+            if (goAction == null) {
                 //若该状态无对应D的状态转移，则弹出
-                if(statusStack.peek() == 0) break;
+                if (statusStack.peek() == 0) break;
                 statusStack.pop();
                 symbolStack.pop();
-            }else{
+            } else {
                 //若该状态有对应D的状态转移，则分情况处理
                 //非特殊处理的状态
                 //压入D以及跳转的状态
-                if(currStatus!=2 && currStatus!=104){
+                if (currStatus != 2 && currStatus != 104) {
                     int targetStatus = Integer.valueOf(goAction);
                     symbolStack.push("D");
                     statusStack.push(Integer.valueOf(goAction));
-                }else{
+                } else {
                     //状态为2和104时，上述过程会陷入死循环，所以将前面的非初始状态全部弹出并压入D
-                    while(true){
-                        if(statusStack.peek()!=0){
+                    while (true) {
+                        if (statusStack.peek() != 0) {
                             statusStack.pop();
                             symbolStack.pop();
-                        }else{
+                        } else {
                             symbolStack.push("D");
                             statusStack.push(Integer.valueOf(lrTable.get(0).get("D")));
                             break;
@@ -286,16 +346,16 @@ public class Anaylser {
         }
 
         //抛弃所有不在follow(D)中的token
-        while(!follow.get("D").contains(tokens.get(tokenIndex).get(0)) ){
+        while (!follow.get("D").contains(tokens.get(tokenIndex).get(0))) {
             tokenIndex++;
         }
         //特殊情况：}，代表一个程序块的结束，直接将所有非初始状态都弹出，压入D
-        if(tokens.get(tokenIndex).get(0).equals("}")){
-            while(true){
-                if(statusStack.peek()!=0){
+        if (tokens.get(tokenIndex).get(0).equals("}")) {
+            while (true) {
+                if (statusStack.peek() != 0) {
                     statusStack.pop();
                     symbolStack.pop();
-                }else{
+                } else {
                     symbolStack.push("D");
                     statusStack.push(Integer.valueOf(lrTable.get(0).get("D")));
                     break;
@@ -305,50 +365,49 @@ public class Anaylser {
         }
 
         //查找错误识别信息
-        if(currStatus==0){
-            errorMessage.add("Error at Line " + lineNumber + ": " + "[ Missing } ]"+"\n");
-        }else if(errorCases.get(currStatus) != null) {
-            errorMessage.add("Error at Line " + lineNumber + ": " + errorCases.get(currStatus)+"\n");
+        if (currStatus == 0) {
+            errorMessage.add("Error at Line " + lineNumber + ": " + "[ Missing } ]" + "\n");
+        } else if (errorCases.get(currStatus) != null) {
+            errorMessage.add("Error at Line " + lineNumber + ": " + errorCases.get(currStatus) + "\n");
         } else {
             // 识别不到的语法错误
-            errorMessage.add("Error at Line " + lineNumber + ": " + "[ Error ]"+"\n");
+            errorMessage.add("Error at Line " + lineNumber + ": " + "[ Error ]" + "\n");
         }
     }
 
     //输出词法分析树
-    public void outputResult(){
-        System.out.println("P(0)");
-        if(reduceDetail.size()>0)
-            outputGramTree.add("P(0)\n");
-            outputRight(reduceDetail.size()-1,2);
+    public void outputResult() {
+        System.out.println("P");
+        if (reduceDetail.size() > 0)
+            outputGramTree.add("P\n");
+        outputRight(reduceDetail.size() - 1, 2);
     }
 
-    public void outputRight(int root, int indent){
+    public void outputRight(int root, int indent) {
         Express rootProd = reduceDetail.get(root);
         String left = rootProd.getLeft();
         List<String> right = Arrays.asList(rootProd.getRight());
         //System.out.println(left);
-        for(int i=0;i<right.size();i++){
+        for (int i = 0; i < right.size(); i++) {
             String r = right.get(i);
-            System.out.println(new String(new char[indent*2]).replace("\0"," ")+r+"("+String.valueOf(indent/2)+")");
-            outputGramTree.add(new String(new char[indent*2]).replace("\0"," ")+r+"("+String.valueOf(indent/2)+")"+"\n");
+            System.out.println(new String(new char[indent]).replace("\0", " ") + r);
+            outputGramTree.add(new String(new char[indent]).replace("\0", " ") + r + "\n");
             //终结符直接输出
-            if(!nonterminal.contains(r)){
+            if (!nonterminal.contains(r)) {
                 continue;
             }
             //非终结符递归查询
-            else{
+            else {
                 int lastSymbolIndex = -1;
-                for(int j=root-1;j>=0;j--){
-                    if(r.equals(reduceDetail.get(j).getLeft())){
+                for (int j = root - 1; j >= 0; j--) {
+                    if (r.equals(reduceDetail.get(j).getLeft())) {
                         lastSymbolIndex = j;
                         break;
                     }
                 }
-                if(lastSymbolIndex!=-1){
-                    outputRight(lastSymbolIndex,indent+2);
-                }
-                else{
+                if (lastSymbolIndex != -1) {
+                    outputRight(lastSymbolIndex, indent + 2);
+                } else {
                     System.out.println("output error");
                 }
             }
@@ -356,38 +415,35 @@ public class Anaylser {
     }
 
     //计算非终结符follow集
-    public void getFollow(){
-        boolean flag ;
+    public void getFollow() {
+        boolean flag;
         follow.put("Program", Arrays.asList("$"));
-        while(true){
+        while (true) {
             flag = true;
-            for(String nonterm:nonterminal){
-                for(int i=0;i<productions.size();i++){
+            for (String nonterm : nonterminal) {
+                for (int i = 0; i < productions.size(); i++) {
                     List<String> right = Arrays.asList(productions.get(i).getRight());
                     String left = productions.get(i).getLeft();
-                    if(right.contains(nonterm)){
+                    if (right.contains(nonterm)) {
                         int index = right.indexOf(nonterm);
-                        if(index != right.size()-1){
-                            Set<String> backFirst = action.getFirst(right.get(index+1));
-                            if(backFirst!=null)
-                            {
+                        if (index != right.size() - 1) {
+                            Set<String> backFirst = action.getFirst(right.get(index + 1));
+                            if (backFirst != null) {
                                 for (String s : backFirst) {
                                     flag = addToFollow(nonterm, s);
                                 }
                             }
-                            if(backFirst.contains("ε")){
+                            if (backFirst.contains("ε")) {
                                 List<String> list = follow.get(left);
-                                if(list!=null)
-                                {
+                                if (list != null) {
                                     for (String s : list) {
                                         flag = addToFollow(nonterm, s);
                                     }
                                 }
                             }
-                        }else{
+                        } else {
                             List<String> list = follow.get(left);
-                            if(list!=null)
-                            {
+                            if (list != null) {
                                 for (String s : follow.get(left)) {
                                     flag = addToFollow(nonterm, s);
                                 }
@@ -396,20 +452,20 @@ public class Anaylser {
                     }
                 }
             }
-            if(!flag){
+            if (!flag) {
                 break;
             }
         }
     }
 
-    public boolean addToFollow(String key,String value){
-        if(follow.get(key) == null){
+    public boolean addToFollow(String key, String value) {
+        if (follow.get(key) == null) {
             List<String> list = new ArrayList<>();
             list.add(value);
-            follow.put(key,list);
+            follow.put(key, list);
             return true;
-        }else{
-            if(!follow.get(key).contains(value)){
+        } else {
+            if (!follow.get(key).contains(value)) {
                 follow.get(key).add(value);
                 return true;
             }
