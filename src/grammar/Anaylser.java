@@ -141,7 +141,7 @@ public class Anaylser {
         valueStack.push(null);
         while(this.tokenIndex<tokens.size()){
             List<String> currentToken = this.tokens.get(tokenIndex);
-            handleInput(currentToken.get(0));
+            handleInput(currentToken);
         }
         System.out.println("规约信息:");
         for(Express s:reduceDetail){
@@ -155,7 +155,10 @@ public class Anaylser {
         }
     }
 
-    public boolean handleInput(String symbol){
+    public boolean handleInput(List<String> token){
+        String symbol = token.get(0);
+        String lexeme = token.get(1);
+        String line = token.get(2);
         int status = this.statusStack.peek();
         String action = this.lrTable.get(status).get(symbol);
         int offset = 0;
@@ -168,6 +171,7 @@ public class Anaylser {
         else if(action.matches("s[0-9]+")){
             statusStack.add(Integer.valueOf(action.substring(1)));
             symbolStack.add(symbol);
+            valueStack.add(new HashMap<>(){{put("lexeme", lexeme);}});
             this.tokenIndex++;
         }
         //归约
@@ -176,16 +180,45 @@ public class Anaylser {
             String left = prod.getLeft();
             List<String> right = Arrays.asList(prod.getRight());
             if(right.contains("ε")){
-
+                String tail = prod.getTail();
+                if("DM1".equals(left) && "ε".equals(tail)) {
+                    // 将DM1.type赋值，先出栈再入栈
+                    Map<String,String> DM1_v = valueStack.pop();
+                    DM1_v.put("type", "record");
+                    // 获取id.lexeme，先出栈再入栈
+                    Map<String,String> id_v = valueStack.pop();
+                    String id_lexeme = id_v.get("lexeme");
+                    // 入栈还原状态，注意DM1在栈顶
+                    valueStack.add(id_v);
+                    valueStack.add(DM1_v);
+                    // 添加符号表
+                    symbolTable.put(id_lexeme,Arrays.asList("record", String.valueOf(offset), line));
+                }
+                else if("DM1".equals(left) && "ε".equals(tail)) {
+                    // 将DM1.type赋值，先出栈再入栈
+                    Map<String,String> DM1_v = valueStack.pop();
+                    DM1_v.put("type", "record");
+                    // 获取id.lexeme，先出栈再入栈
+                    Map<String,String> id_v = valueStack.pop();
+                    String id_lexeme = id_v.get("lexeme");
+                    // 入栈还原状态，注意DM1在栈顶
+                    valueStack.add(id_v);
+                    valueStack.add(DM1_v);
+                    // 添加符号表
+                    symbolTable.put(id_lexeme,Arrays.asList("record", String.valueOf(offset), line));
+                }
             }else{
+                List<String> symbolList = new ArrayList<>();
+                List<Map<String,String>> valueList = new ArrayList<>();
                 for(int i=0;i<right.size();i++){
                     statusStack.pop();
-                    symbolStack.pop();
-                    String tail = prod.getTail();
-                    if("D".equals(left) && "T id;".equals(tail)){
-                        //symbolTable.put(symbol, Arrays.asList(valueStack,""));
-                    }
-
+                    symbolList.add(symbolStack.pop());
+                    valueList.add(valueStack.pop());
+                }
+                String tail = prod.getTail();
+                if("D".equals(left) && "T id;".equals(tail)){
+                    symbolTable.put(valueList.get(1).get("lexeme"), Arrays.asList(valueList.get(2).get("type"), String.valueOf(offset),line));
+                    offset += Integer.parseInt(valueList.get(2).get("width"));
                 }
             }
             reduceDetail.add(prod);
