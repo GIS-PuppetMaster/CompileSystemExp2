@@ -91,7 +91,7 @@ public class Anaylser {
         errorCases.put(29,"[ Missing ) ]");
         errorCases.put(271,"[ Missing ) ]");
         errorCases.put(269,"[ Missing {\\} ]");
-        errorCases.put(18,"[ Missing {\\} ]");
+        errorCases.put(18,"[ Missing { ]");
         errorCases.put(93,"[ Missing variable ]");
 
 
@@ -275,9 +275,9 @@ public class Anaylser {
 
     //输出词法分析树
     public void outputResult(){
-        System.out.println("P");
+        System.out.println("P(0)");
         if(reduceDetail.size()>0)
-            outputGramTree.add("P\n");
+            outputGramTree.add("P(0)\n");
             outputRight(reduceDetail.size()-1,2);
     }
 
@@ -288,8 +288,8 @@ public class Anaylser {
         //System.out.println(left);
         for(int i=0;i<right.size();i++){
             String r = right.get(i);
-            System.out.println(new String(new char[indent]).replace("\0"," ")+r);
-            outputGramTree.add(new String(new char[indent]).replace("\0"," ")+r+"\n");
+            System.out.println(new String(new char[indent*2]).replace("\0"," ")+r+"("+String.valueOf(indent/2)+")");
+            outputGramTree.add(new String(new char[indent*2]).replace("\0"," ")+r+"("+String.valueOf(indent/2)+")"+"\n");
             //终结符直接输出
             if(!nonterminal.contains(r)){
                 continue;
