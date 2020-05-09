@@ -1,1 +1,5 @@
-int [ 1 ]arr;
+int [2]a;
+a=1;
+if(a==1)
+then a=1;
+else a=2;
