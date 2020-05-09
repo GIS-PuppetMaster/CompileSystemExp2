@@ -250,8 +250,15 @@ public class Anaylser {
                     valueStack.add(new HashMap<>(){{
                         put("nextlist",l);
                     }});
-                } else if("P".equals(left)||"C".equals(left)){
+                } else if("P".equals(left)){
                     valueStack.add(new HashMap<>());
+                } else if ("C".equals(left)) {
+                    valueStack.add(new HashMap<>() {{
+                        put("type", Arrays.asList(t));
+                        valueStack.add(new HashMap<>());
+                        put("width", Arrays.asList(w));
+                    }});
+
                 }
             } else {
                 List<String> symbolList = new ArrayList<>();
@@ -295,7 +302,7 @@ public class Anaylser {
                         }});
                     }
                 } else if ("C".equals(left) && "[ num ] C".equals(tail)) {
-                    int val = Integer.parseInt(valueList.get(2).get("val").get(0));
+                    int val = Integer.parseInt(valueList.get(2).get("lexeme").get(0));
                     int c1_width = Integer.parseInt(valueList.get(0).get("width").get(0));
                     valueStack.add(new HashMap<>() {{
                         put("type", Arrays.asList(String.format("array(%d, %s);", val, valueList.get(0).get("type").get(0))));

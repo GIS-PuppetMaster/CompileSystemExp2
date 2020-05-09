@@ -1,8 +1,5 @@
-int i ;
-char c;
-float b ;
-char c ;
-struct stu { int age ; }
-proc int fun ( int arg ){ float f ; }
-proc char fun2 ( int arg2 ){ float e ; }
-proc char fun2 ( int arg2 ){ float e ; }
+int [2]a;
+a=1;
+if(a==1)
+then a=1;
+else a=2;
