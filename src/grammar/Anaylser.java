@@ -8,7 +8,7 @@ import zkx.AnalysisFormat;
 import zkx.FormatElement;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
+
 import java.text.Normalizer;
 import java.util.*;
 
@@ -166,9 +166,11 @@ public class Anaylser {
 
     public void addToSymbolTable(String key,List<String> list) {
         if (symbolTable.containsKey(key)) {
-            errorLog.add(String.format("重复声明:{%s},{%s},{%s},{%s}", key, list.get(0), list.get(1), list.get(2)));
+            errorLog.add(String.format("Error at Line %s: 重复声明, id: %s, type: %s, offset: %s\n", list.get(2), key, list.get(0), list.get(1)));
         }
-        symbolTable.put(key, list);
+        else{
+            symbolTable.put(key, list);
+        }
     }
 
     public boolean handleInput(List<String> token) {
@@ -286,7 +288,7 @@ public class Anaylser {
                     int val = Integer.parseInt(valueList.get(2).get("val").get(0));
                     int c1_width = Integer.parseInt(valueList.get(0).get("width").get(0));
                     valueStack.add(new HashMap<>() {{
-                        put("type", Arrays.asList(String.format("array({%d},{%s});", val, valueList.get(0).get("type").get(0))));
+                        put("type", Arrays.asList(String.format("array({%d}, {%s});", val, valueList.get(0).get("type").get(0))));
                         put("width", Arrays.asList(String.valueOf(val * c1_width)));
                     }});
                 } else if ("M".equals(left)) {
