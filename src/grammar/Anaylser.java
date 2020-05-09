@@ -163,8 +163,8 @@ public class Anaylser {
     public void addToSymbolTable(String key,List<String> list) {
         if (symbolTable.containsKey(key)) {
             errorLog.add(String.format("Error at Line %s: 重复声明, id: %s, type: %s, offset: %s\n", list.get(2), key, list.get(0), list.get(1)));
+            symbolTable.put(key, list);
         }
-        symbolTable.put(key, list);
     }
 
     public boolean handleInput(List<String> token) {
