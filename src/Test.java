@@ -21,6 +21,7 @@ public class Test {
             anaylser = new Anaylser();
             anaylser.analyse();
             System.out.println("\n符号表:\n"+anaylser.symbolTable);
+            System.out.println("\n语义分析错误信息:\n"+anaylser.errorLog);
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }

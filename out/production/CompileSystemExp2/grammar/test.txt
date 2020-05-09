@@ -1,4 +1,5 @@
 int i ;
+char c;
 float b ;
 char c ;
 struct stu { int age ; }
