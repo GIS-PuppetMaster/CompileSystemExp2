@@ -384,10 +384,13 @@ public class Anaylser {
                     List<String> bFalse = valueList.get(4).get("falselist");
                     String bm1Quad = valueList.get(6).get("quad").get(0);
                     String bm2Quad = valueList.get(1).get("quad").get(0);
-                    for(String s:s1Next){
-                        int index = Integer.valueOf(s);
-                        String patched = add3Code.get(index) + " "+ bm1Quad;
-                        add3Code.set(index,patched);
+                    if(s1Next!=null)
+                    {
+                        for (String s : s1Next) {
+                            int index = Integer.valueOf(s);
+                            String patched = add3Code.get(index) + " " + bm1Quad;
+                            add3Code.set(index, patched);
+                        }
                     }
                     for(String s:bTrue){
                         int index = Integer.valueOf(s);
@@ -660,8 +663,8 @@ public class Anaylser {
                     add3Code.add("goto");
                     List<String> l1 = new ArrayList<>();
                     List<String> l2 = new ArrayList<>();
-                    l1.add(String.valueOf(add3Code.size()-2));
-                    l2.add(String.valueOf(add3Code.size()-1));
+                    l1.add(String.valueOf(add3Code.size()));
+                    l2.add(String.valueOf(add3Code.size()+1));
                     valueStack.add(new HashMap<>(){{
                         put("truelist",l1);
                         put("falselist",l2);
@@ -673,7 +676,7 @@ public class Anaylser {
                 else if("I".equals(left) && "true".equals(tail)){
                     add3Code.add("goto");
                     List<String> l1 = new ArrayList<>();
-                    l1.add(String.valueOf(add3Code.size()-1));
+                    l1.add(String.valueOf(add3Code.size()));
                     valueStack.add(new HashMap<>(){{
                         put("truelist",l1);
                     }});
@@ -684,7 +687,7 @@ public class Anaylser {
                 else if("I".equals(left) && "false".equals(tail)){
                     add3Code.add("goto");
                     List<String> l1 = new ArrayList<>();
-                    l1.add(String.valueOf(add3Code.size()-1));
+                    l1.add(String.valueOf(add3Code.size()));
                     valueStack.add(new HashMap<>(){{
                         put("falselist",l1);
                     }});
@@ -748,6 +751,34 @@ public class Anaylser {
             reduceDetail.add(prod);
             symbolStack.add(left);
 
+            if(symbolStack.peek().equals("S")){
+                Map<String,List<String>> tmpMap1 = valueStack.peek();
+                String nextQuad = String.valueOf(add3Code.size());
+                if(tmpMap1.containsKey("nextlist")){
+                    List<String> nextlist = tmpMap1.get("nextlist");
+                    for(String s:nextlist){
+                        int index = Integer.valueOf(s);
+                        String patched = add3Code.get(index) + " "+ nextQuad;
+                        add3Code.set(index,patched);
+                    }
+                }
+                if(tmpMap1.containsKey("truelist")){
+                    List<String> truelist = tmpMap1.get("truelist");
+                    for(String s:truelist){
+                        int index = Integer.valueOf(s);
+                        String patched = add3Code.get(index) + " "+ nextQuad;
+                        add3Code.set(index,patched);
+                    }
+                }
+                if(tmpMap1.containsKey("falselist")){
+                    List<String> falselist = tmpMap1.get("falselist");
+                    for(String s:falselist){
+                        int index = Integer.valueOf(s);
+                        String patched = add3Code.get(index) + " "+ nextQuad;
+                        add3Code.set(index,patched);
+                    }
+                }
+            }
             //归约后的goto
             int currentStatus = statusStack.peek();
             if (lrTable.get(currentStatus).get(left) != null) {
@@ -940,8 +971,10 @@ public class Anaylser {
         Anaylser anaylser = new Anaylser();
         //anaylser.tokens = Arrays.asList(Arrays.asList("int"),Arrays.asList("id"),Arrays.asList(";"),Arrays.asList("$"));
         anaylser.analyse();
+        int line = 0;
         for(String s:anaylser.add3Code){
-            System.out.println(s);
+            line++;
+            System.out.println(line+" "+s);
         }
     }
 }
