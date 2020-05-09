@@ -205,7 +205,7 @@ public class Anaylser {
 
             if (right.contains("ε")) {
                 String tail = prod.getTail();
-                if ("DM1".equals(left) && "ε".equals(tail)) {
+                if ("DM1".equals(left)) {
                     // 将DM1.type赋值
                     Map<String, List<String>> DM1_v = new HashMap<>();
                     DM1_v.put("type", Arrays.asList("record"));
@@ -216,7 +216,7 @@ public class Anaylser {
                     valueStack.add(DM1_v);
                     // 添加符号表
                     addToSymbolTable(id_lexeme, Arrays.asList("record", String.valueOf(offset), line));
-                } else if ("DM2".equals(left) && "ε".equals(tail)) {
+                } else if ("DM2".equals(left)) {
                     // 将DM1.type赋值
                     Map<String, List<String>> DM2_v = new HashMap<>();
                     DM2_v.put("type", Arrays.asList("proc"));
@@ -227,44 +227,50 @@ public class Anaylser {
                     valueStack.add(DM2_v);
                     // 添加符号表
                     addToSymbolTable(id_lexeme, Arrays.asList("proc", String.valueOf(offset), line));
-                } else if ("TM".equals(left) && "ε".equals(tail)) {
+                } else if ("TM".equals(left)) {
                     // 栈顶必定为X
-                    Map<String, List<String>> x_v = valueStack.pop();
+                    Map<String, List<String>> x_v = valueStack.peek();
                     t = x_v.get("type").get(0);
                     w = x_v.get("width").get(0);
                     // 放回x
-                    valueStack.add(x_v);
-                } else if ("C".equals(left) && "ε".equals(tail)) {
+                    valueStack.add(new HashMap<>());
+                } else if ("C".equals(left)) {
                     valueStack.add(new HashMap<>() {{
                         put("type", Arrays.asList(t));
                         put("width", Arrays.asList(w));
                     }});
-                } else if("BM".equals(left) && "ε".equals(tail)){
+                } else if("BM".equals(left)){
                     valueStack.add(new HashMap<>(){{
                         put("quad",Arrays.asList(String.valueOf(add3Code.size())));
                     }});
-                } else if("N".equals(left) && "ε".equals(tail)){
+                } else if("N".equals(left)){
                     List<String> l = new ArrayList<>();
                     add3Code.add("goto");
                     l.add(String.valueOf(add3Code.size()-1));
                     valueStack.add(new HashMap<>(){{
                         put("nextlist",l);
                     }});
+                } else if("P".equals(left)||"C".equals(left)){
+                    valueStack.add(new HashMap<>());
                 }
             } else {
                 List<String> symbolList = new ArrayList<>();
                 List<Map<String, List<String>>> valueList = new ArrayList<>();
                 for (int i = 0; i < right.size(); i++) {
-                    if (valueList.size()==symbolList.size() && valueStack.size()>1){
-                        valueList.add(valueStack.pop());
-                    }
+                    valueList.add(valueStack.pop());
                     statusStack.pop();
                     symbolList.add(symbolStack.pop());
                 }
                 String tail = prod.getTail();
-                if ("D".equals(left) && "T id ;".equals(tail)) {
-                    addToSymbolTable(valueList.get(1).get("lexeme").get(0), Arrays.asList(valueList.get(2).get("type").get(0), String.valueOf(offset), line));
-                    offset += Integer.parseInt(valueList.get(2).get("width").get(0));
+                if ("D".equals(left)) {
+                    if("T id ;".equals(tail)) {
+                        addToSymbolTable(valueList.get(1).get("lexeme").get(0), Arrays.asList(valueList.get(2).get("type").get(0), String.valueOf(offset), line));
+                        offset += Integer.parseInt(valueList.get(2).get("width").get(0));
+                        valueStack.add(new HashMap<>());
+                    }
+                    else if("struct id DM1 { P }".equals(tail) || "proc X id DM2 ( M ) { P }".equals(tail)){
+                        valueStack.add(new HashMap<>());
+                    }
                 } else if ("T".equals(left) && "X TM C".equals(tail)) {
                     // 为后面压栈的T先压入属性
                     valueStack.add(new HashMap<>() {{
@@ -307,6 +313,10 @@ public class Anaylser {
                             put("size", Arrays.asList("1"));
                         }});
                     }
+                } else if("P".equals(left) && ("D P".equals(tail) || "S P".equals(tail))){
+                    valueStack.add(new HashMap<>());
+                } else if("Program".equals(left) && "P".equals(tail)){
+                    valueStack.add(new HashMap<>());
                 }
 
 //yu---------------------------------------------------------------------------------------------------
