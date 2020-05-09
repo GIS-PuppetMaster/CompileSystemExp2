@@ -20,7 +20,7 @@ public class Test {
         try {
             anaylser = new Anaylser();
             anaylser.analyse();
-            int a =0 ;
+            System.out.println("\n符号表:\n"+anaylser.symbolTable);
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }

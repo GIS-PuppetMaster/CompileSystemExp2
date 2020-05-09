@@ -1,1 +1,6 @@
 int i ;
+float b ;
+char c ;
+struct stu { int age ; }
+proc int fun ( int arg ){ float f ; }
+proc char fun2 ( int arg2 ){ float e ; }

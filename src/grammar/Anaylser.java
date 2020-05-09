@@ -182,8 +182,9 @@ public class Anaylser {
         else if (action.matches("s[0-9]+")) {
             statusStack.add(Integer.valueOf(action.substring(1)));
             symbolStack.add(symbol);
+            String finalLexeme = lexeme;
             valueStack.add(new HashMap<>() {{
-                put("lexeme", Arrays.asList(lexeme));
+                put("lexeme", Arrays.asList(finalLexeme));
             }});
             this.tokenIndex++;
         }
