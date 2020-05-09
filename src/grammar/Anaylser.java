@@ -20,14 +20,15 @@ public class Anaylser {
     public Map<Integer, Map<String, String>> lrTable = new HashMap();//分析表
     public Stack<Integer> statusStack = new Stack<Integer>();//状态栈
     public Stack<String> symbolStack = new Stack<String>();//符号栈
-    public Stack<Map<String, String>> valueStack = new Stack<>();//属性栈
+    public Stack<Map<String, List<String>>> valueStack = new Stack<>();//属性栈
     public List<Express> reduceDetail = new ArrayList<>();//执行栈信息
     public Map<String, List<String>> follow = new HashMap<>();//非终结符的follow集
     public Action action;
     public List<String> errorMessage = new ArrayList<>();//错误信息
     public Map<Integer, String> errorCases = new HashMap<>();//错误提示
     public List<String> outputGramTree = new ArrayList<>();//词法分析树
-    Map<String, List<String>> symbolTable = new HashMap<>();//符号表
+    public Map<String, List<String>> symbolTable = new HashMap<>();//符号表
+    public List<String> errorLog = new ArrayList<>();//错误日志
     int offset = 0;
     String t = null;
     String w = null;
@@ -134,7 +135,7 @@ public class Anaylser {
     //LR分析
     public void analyse() {
         //获取token
-        String testFilePath = "src/grammar/new_grammar.txt";
+        String testFilePath = "./src/grammar/test.txt";
         LexicalAnalyzer l = new LexicalAnalyzer(testFilePath);
         l.scanner();
         tokens = l.getTokens();
@@ -159,6 +160,13 @@ public class Anaylser {
         }
     }
 
+    public void addToSymbolTable(String key,List<String> list) {
+        if (symbolTable.containsKey(key)) {
+            errorLog.add(String.format("重复声明:{%s},{%s},{%s},{%s}", key, list.get(0), list.get(1), list.get(2)));
+        }
+        symbolTable.put(key, list);
+    }
+
     public boolean handleInput(List<String> token) {
         String symbol = token.get(0);
         String lexeme = token.get(1);
@@ -175,7 +183,7 @@ public class Anaylser {
             statusStack.add(Integer.valueOf(action.substring(1)));
             symbolStack.add(symbol);
             valueStack.add(new HashMap<>() {{
-                put("lexeme", lexeme);
+                put("lexeme", Arrays.asList(lexeme));
             }});
             this.tokenIndex++;
         }
@@ -188,54 +196,53 @@ public class Anaylser {
                 String tail = prod.getTail();
                 if ("DM1".equals(left) && "ε".equals(tail)) {
                     // 将DM1.type赋值
-                    Map<String, String> DM1_v = new HashMap<>();
-                    DM1_v.put("type", "record");
+                    Map<String, List<String>> DM1_v = new HashMap<>();
+                    DM1_v.put("type", Arrays.asList("record"));
                     // 获取id.lexeme，先出栈再入栈
-                    Map<String, String> id_v = valueStack.pop();
-                    String id_lexeme = id_v.get("lexeme");
-                    // 入栈还原状态，注意DM1在栈顶
-                    valueStack.add(id_v);
+                    Map<String, List<String>> id_v = valueStack.peek();
+                    String id_lexeme = id_v.get("lexeme").get(0);
                     // DM1在属性栈顶
                     valueStack.add(DM1_v);
                     // 添加符号表
-                    symbolTable.put(id_lexeme, Arrays.asList("record", String.valueOf(offset), line));
+                    addToSymbolTable(id_lexeme, Arrays.asList("record", String.valueOf(offset), line));
                 } else if ("DM2".equals(left) && "ε".equals(tail)) {
                     // 将DM1.type赋值
-                    Map<String, String> DM2_v = new HashMap<>();
-                    DM2_v.put("type", "proc");
+                    Map<String, List<String>> DM2_v = new HashMap<>();
+                    DM2_v.put("type", Arrays.asList("proc"));
                     // 获取id.lexeme，先出栈再入栈
-                    Map<String, String> id_v = valueStack.pop();
-                    String id_lexeme = id_v.get("lexeme");
-                    // 入栈还原状态，注意DM2在栈顶
-                    valueStack.add(id_v);
+                    Map<String, List<String>> id_v = valueStack.peek();
+                    String id_lexeme = id_v.get("lexeme").get(0);
+                    // 入栈，注意DM2在栈顶
                     valueStack.add(DM2_v);
                     // 添加符号表
-                    symbolTable.put(id_lexeme, Arrays.asList("proc", String.valueOf(offset), line));
+                    addToSymbolTable(id_lexeme, Arrays.asList("proc", String.valueOf(offset), line));
                 } else if ("TM".equals(left) && "ε".equals(tail)) {
                     // 栈顶必定为X
-                    Map<String, String> x_v = valueStack.pop();
-                    t = x_v.get("type");
-                    w = x_v.get("width");
+                    Map<String, List<String>> x_v = valueStack.pop();
+                    t = x_v.get("type").get(0);
+                    w = x_v.get("width").get(0);
                     // 放回x
                     valueStack.add(x_v);
                 } else if ("C".equals(left) && "ε".equals(tail)) {
                     valueStack.add(new HashMap<>() {{
-                        put("type", t);
-                        put("width", w);
+                        put("type", Arrays.asList(t));
+                        put("width", Arrays.asList(w));
                     }});
                 }
             } else {
                 List<String> symbolList = new ArrayList<>();
-                List<Map<String, String>> valueList = new ArrayList<>();
+                List<Map<String, List<String>>> valueList = new ArrayList<>();
                 for (int i = 0; i < right.size(); i++) {
+                    if (valueList.size()==symbolList.size() && valueStack.size()>0){
+                        valueList.add(valueStack.pop());
+                    }
                     statusStack.pop();
                     symbolList.add(symbolStack.pop());
-                    valueList.add(valueStack.pop());
                 }
                 String tail = prod.getTail();
                 if ("D".equals(left) && "T id ;".equals(tail)) {
-                    symbolTable.put(valueList.get(1).get("lexeme"), Arrays.asList(valueList.get(2).get("type"), String.valueOf(offset), line));
-                    offset += Integer.parseInt(valueList.get(2).get("width"));
+                    addToSymbolTable(valueList.get(1).get("lexeme").get(0), Arrays.asList(valueList.get(2).get("type").get(0), String.valueOf(offset), line));
+                    offset += Integer.parseInt(valueList.get(2).get("width").get(0));
                 } else if ("T".equals(left) && "X TM C".equals(tail)) {
                     // 为后面压栈的T先压入属性
                     valueStack.add(new HashMap<>() {{
@@ -245,37 +252,37 @@ public class Anaylser {
                 } else if ("X".equals(left)) {
                     if ("int".equals(tail)) {
                         valueStack.add(new HashMap<>() {{
-                            put("type", "int");
-                            put("width", "4");
+                            put("type", Arrays.asList("int"));
+                            put("width", Arrays.asList("4"));
                         }});
                     } else if ("float".equals(tail)) {
                         valueStack.add(new HashMap<>() {{
-                            put("type", "float");
-                            put("width", "8");
+                            put("type", Arrays.asList("float"));
+                            put("width", Arrays.asList("8"));
                         }});
                     } else if ("char".equals(tail)) {
                         valueStack.add(new HashMap<>() {{
-                            put("type", "char");
-                            put("width", "1");
+                            put("type", Arrays.asList("char"));
+                            put("width", Arrays.asList("1"));
                         }});
                     }
                 } else if ("C".equals(left) && "[ num ] C".equals(tail)) {
-                    int val = Integer.parseInt(valueList.get(2).get("val"));
-                    int c1_width = Integer.parseInt(valueList.get(0).get("width"));
+                    int val = Integer.parseInt(valueList.get(2).get("val").get(0));
+                    int c1_width = Integer.parseInt(valueList.get(0).get("width").get(0));
                     valueStack.add(new HashMap<>() {{
-                        put("type", String.format("array({%d}, {%s});", val, valueList.get(0).get("type")));
-                        put("width", String.valueOf(val * c1_width));
+                        put("type", Arrays.asList(String.format("array({%d}, {%s});", val, valueList.get(0).get("type").get(0))));
+                        put("width", Arrays.asList(String.valueOf(val * c1_width)));
                     }});
                 } else if ("M".equals(left)) {
-                    symbolTable.put(valueList.get(0).get("lexeme"), Arrays.asList(valueList.get(1).get("type"), String.valueOf(offset), line));
-                    offset += Integer.parseInt(valueList.get(1).get("width"));
+                    addToSymbolTable(valueList.get(0).get("lexeme").get(0), Arrays.asList(valueList.get(1).get("type").get(0), String.valueOf(offset), line));
+                    offset += Integer.parseInt(valueList.get(1).get("width").get(0));
                     if ("M , X id".equals(tail)) {
                         valueStack.add(new HashMap<>() {{
-                            put("size", String.valueOf(Integer.parseInt(valueList.get(3).get("size")) + 1));
+                            put("size", Arrays.asList(String.valueOf(Integer.parseInt(valueList.get(3).get("size").get(0)) + 1)));
                         }});
                     } else if ("X id".equals(tail)) {
                         valueStack.add(new HashMap<>() {{
-                            put("size", "1");
+                            put("size", Arrays.asList("1"));
                         }});
                     }
                 } else if("S".equals(left) && "L = E ;".equals(tail)){
@@ -303,7 +310,7 @@ public class Anaylser {
 
     //打印栈内信息
     public void printStack() {
-        System.out.println(String.format("%-90s", this.statusStack) + String.format("%-90s", this.symbolStack));
+        System.out.println(String.format("%-90s", this.statusStack) + String.format("%-90s", this.symbolStack)+ String.format("%-90s", this.valueStack));
     }
 
     //处理错误
