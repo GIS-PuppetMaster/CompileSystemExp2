@@ -10,6 +10,7 @@ while while
 for for
 record record
 call call
+struct struct
 proc proc
 return return
 = =
