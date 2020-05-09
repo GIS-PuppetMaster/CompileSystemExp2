@@ -188,6 +188,7 @@ public class Anaylser {
         //移入
         else if (action.matches("s[0-9]+")) {
             if(symbolStack.peek().equals("S")){
+                //System.out.println("1");
                 Map<String,List<String>> tmpMap = valueStack.peek();
                 String nextQuad = String.valueOf(add3Code.size());
                 if(tmpMap.containsKey("nextlist")){
@@ -433,7 +434,7 @@ public class Anaylser {
                         n++;
                         add3Code.add(String.format("param %s",s));
                     }
-                    add3Code.add(String.format("call %s , %d",valueList.get(4).get("addr").get(0),n));
+                    add3Code.add(String.format("call %s , %d",valueList.get(4).get("lexeme").get(0),n));
                     valueStack.add(new HashMap<>());
                 }
                 //S->return E ;
