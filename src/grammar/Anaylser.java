@@ -456,18 +456,24 @@ public class Anaylser {
                     tmpMap = valueList.get(3);
                     String array = tmpMap.get("array").get(0);
                     String type = tmpMap.get("type").get(0);
+                    String finalType = type;
                     //TODO
-                    String width = type.substring(type.indexOf("(")+1,type.indexOf(","));
+                    int width = 1;
+                    while(!type.equals("int")){
+                        width *= Integer.valueOf(type.substring(type.indexOf("(")+1,type.indexOf(",")));
+                        type = type.substring(type.indexOf(",")+2,type.length()-2);
+                    }
                     String offset = tmpMap.get("offset").get(0);//L1-offset
-                    add3Code.add(String.format("t%d = %s * %s",tmpIndex,addr,width));
+                    add3Code.add(String.format("t%d = %s * %d",tmpIndex,addr,width));
                     tmpIndex++;
                     add3Code.add(String.format("t%d = %s + t%d",tmpIndex,offset,tmpIndex-1));
                     tmpIndex++;
-                    String finalType = type.substring(type.indexOf(",")+2,type.length()-1);
+                    int finalWidth = width;
                     valueStack.add(new HashMap<>(){{
                         put("array",Arrays.asList(array));
-                        put("type",Arrays.asList(finalType));
-                        put("offset",Arrays.asList(offset));
+                        put("type",Arrays.asList(finalType.substring(finalType.indexOf(",")+2, finalType.length()-2)));
+                        put("offset",Arrays.asList("t"+String.valueOf(tmpIndex-1)));
+                        put("width",Arrays.asList(String.valueOf(finalWidth)));
                     }});
                 }
                 //L -> id [ E ]
@@ -480,20 +486,29 @@ public class Anaylser {
                 else if("L".equals(left) && "id [ E ]".equals(tail)){
                     tmpMap = valueList.get(3);//id
                     List<String> p = symbolTable.get(tmpMap.get("lexeme").get(0));
+                    String array = tmpMap.get("lexeme").get(0);
                     if(p == null){
                         //TODO
                         //变量未声明
                     }else{
                         String type = p.get(0);
-                        String elem = type.substring(type.indexOf(",")+1,type.length()-1);
-                        String width = elem.substring(elem.indexOf("(")+1,elem.indexOf(","));
+                        String finalType = type;
+                        String elem = type.substring(type.indexOf(",")+1,type.length()-2);
+                        int width = 1;
+                        while(!type.equals("int")){
+                            width *= Integer.valueOf(type.substring(type.indexOf("(")+1,type.indexOf(",")));
+                            type = type.substring(type.indexOf(",")+2,type.length()-2);
+
+                        }
                         tmpMap = valueList.get(1);//E
                         String addr = tmpMap.get("addr").get(0);
-                        add3Code.add(String.format("t%d = %s * %s",tmpIndex,addr,width));
+                        add3Code.add(String.format("t%d = %s * %d",tmpIndex,addr,width));
+                        int finalWidth = width;
                         valueStack.add(new HashMap<>(){{
-                            put("array",Arrays.asList(p.get(0)));
+                            put("array",Arrays.asList(array));
                             put("type",Arrays.asList(elem));
                             put("offset",Arrays.asList("t"+tmpIndex));
+                            put("width",Arrays.asList(String.valueOf(finalWidth)));
                         }});
                         tmpIndex++;
                     }
