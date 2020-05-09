@@ -6,6 +6,7 @@ import Action.Express;
 import zkx.AnalysisFormat;
 import zkx.FormatElement;
 
+import javax.sound.sampled.Line;
 import javax.swing.*;
 import javax.swing.text.TabableView;
 import java.awt.Dimension;
@@ -40,7 +41,25 @@ public class UI {
         frame.pack();
         frame.setVisible(true);
     }
-
+    public static String outputSymbolTable(Map<String, List<String>> table){
+        StringBuilder stringBuilder = new StringBuilder();
+        String form = "%22s %20s %20s %16s\n";
+        stringBuilder.append(String.format("%16s %16s %16s %8s\n","标识符","类型","偏移量","行号"));
+        for(Map.Entry<String,List<String>> entry : table.entrySet()){
+            stringBuilder.append(String.format(form,entry.getKey(),entry.getValue().get(0),entry.getValue().get(1),entry.getValue().get(2)));
+        }
+        return stringBuilder.toString();
+    }
+    public static String outputCode(List<String> addr3code, List<String> tuple4code){
+        StringBuilder stringBuilder = new StringBuilder();
+        String form = "%32s %30s\n";
+        stringBuilder.append(String.format("%24s %24s\n","三地址码","四元式"));
+        int size = addr3code.size();
+        for(int i=0;i<size;i++){
+            stringBuilder.append(String.format(form,addr3code.get(i),tuple4code.get(i),"行号"));
+        }
+        return stringBuilder.toString();
+    }
     public UI() {
 
         //词法分析
@@ -65,33 +84,19 @@ public class UI {
                     ioException.printStackTrace();
                 }
                 anaylser.analyse();
-                List<String> errorMessage = anaylser.errorMessage;
+                List<String> errorMessage = anaylser.errorLog;
                 List<Express> reduceDetail = anaylser.reduceDetail;
                 Map<Integer,Map<String,String>> lrTable = anaylser.lrTable;
                 List<String> outputGramTree = anaylser.outputGramTree;
-
-                AnalysisFormat analysisFormat = new AnalysisFormat(anaylser.action);
-                List<Object> list = analysisFormat.buildFormat();
-                Map<Integer, Map<String, FormatElement>> format = (Map<Integer, Map<String, FormatElement>>) list.get(0);
-                textArea4.setText(analysisFormat.outputFormat(format));
 
                 StringBuilder sb = new StringBuilder();
                 for(String s:errorMessage){
                     sb.append(s);
                 }
                 textArea2.setText(sb.toString());
+                textArea4.setText(outputCode(anaylser.add3Code, anaylser.tuple4Code));
 
-                sb = new StringBuilder();
-                for(String s:outputGramTree){
-                    sb.append(s);
-                }
-                textArea1.setText(sb.toString());
-
-                sb = new StringBuilder();
-                for(Express s:reduceDetail){
-                    sb.append(s.toString()+"\n");
-                }
-                textArea3.setText(sb.toString());
+                textArea1.setText(outputSymbolTable(anaylser.symbolTable));
             }
         });
     }
