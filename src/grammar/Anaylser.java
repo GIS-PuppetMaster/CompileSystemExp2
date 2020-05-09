@@ -328,6 +328,7 @@ public class Anaylser {
                     String offset = tmpMap.get("offset").get(0);
                     String addr = valueList.get(1).get("addr").get(0);
                     add3Code.add(String.format("%s[%s] = %s",array,offset,addr));
+                    valueStack.add(new HashMap<>());
                 }
                 //S->id = E ;
                 //{p = lookup(id.lexeme);
@@ -341,6 +342,7 @@ public class Anaylser {
                         String addr = valueList.get(1).get("addr").get(0);
                         add3Code.add(String.format("%s = %s",valueList.get(3).get("lexeme").get(0),addr));
                     }
+                    valueStack.add(new HashMap<>());
                 }
                 //S->if ( B ) BM then S N else BM S  // 分支语句
                 //{backpatch(B.truelist, BM1.quad);
@@ -365,8 +367,8 @@ public class Anaylser {
                         String patched = add3Code.get(index) + " "+ bm2Quad;
                         add3Code.set(index,patched);
                     }
-                    s1Next.addAll(nNext);
-                    s1Next.addAll(s2Next);
+                    if(nNext!=null) s1Next.addAll(nNext);
+                    if(s2Next!=null) s1Next.addAll(s2Next);
                     valueStack.add(new HashMap<>(){{
                         put("nextlist",s1Next);
                     }});
@@ -410,11 +412,13 @@ public class Anaylser {
                         add3Code.add(String.format("param %s",s));
                     }
                     add3Code.add(String.format("call %s , %d",valueList.get(4).get("addr").get(0),n));
+                    valueStack.add(new HashMap<>());
                 }
                 //S->return E ;
                 //{gen(‘return’ E.addr);}
                 else if("S".equals(left) && "return E ;".equals(tail)){
                     add3Code.add(String.format("return %s",valueList.get(1).get("addr").get(0)));
+                    valueStack.add(new HashMap<>());
                 }
                 //L -> L [ E ]
                 // {L.array = L1.array;
@@ -429,15 +433,14 @@ public class Anaylser {
                     tmpMap = valueList.get(3);
                     String array = tmpMap.get("array").get(0);
                     String type = tmpMap.get("type").get(0);
-                    type = type.substring(type.indexOf(",")+1,type.length()-1);//L1-type
                     //TODO
-                    String width = tmpMap.get("width").get(0);//L1-width
+                    String width = type.substring(type.indexOf("(")+1,type.indexOf(","));
                     String offset = tmpMap.get("offset").get(0);//L1-offset
                     add3Code.add(String.format("t%d = %s * %s",tmpIndex,addr,width));
                     tmpIndex++;
                     add3Code.add(String.format("t%d = %s + t%d",tmpIndex,offset,tmpIndex-1));
                     tmpIndex++;
-                    String finalType = type;
+                    String finalType = type.substring(type.indexOf(",")+2,type.length()-1);
                     valueStack.add(new HashMap<>(){{
                         put("array",Arrays.asList(array));
                         put("type",Arrays.asList(finalType));
@@ -465,7 +468,7 @@ public class Anaylser {
                         String addr = tmpMap.get("addr").get(0);
                         add3Code.add(String.format("t%d = %s * %s",tmpIndex,addr,width));
                         valueStack.add(new HashMap<>(){{
-                            put("array",List.copyOf(p));
+                            put("array",Arrays.asList(p.get(0)));
                             put("type",Arrays.asList(elem));
                             put("offset",Arrays.asList("t"+tmpIndex));
                         }});
