@@ -367,10 +367,10 @@ public class Anaylser {
                         String patched = add3Code.get(index) + " "+ bm2Quad;
                         add3Code.set(index,patched);
                     }
-                    if(nNext!=null) s1Next.addAll(nNext);
-                    if(s2Next!=null) s1Next.addAll(s2Next);
+                    if(s1Next!=null) nNext.addAll(s1Next);
+                    if(s2Next!=null) nNext.addAll(s2Next);
                     valueStack.add(new HashMap<>(){{
-                        put("nextlist",s1Next);
+                        put("nextlist",nNext);
                     }});
                 }
                 //S->while BM ( B ) do BM S  // 循环语句
