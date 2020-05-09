@@ -32,6 +32,7 @@ public class Anaylser {
     public List<String> errorLog = new ArrayList<>();//错误日志
     public List<String> add3Code = new ArrayList<>();//三地址码
     public List<String> tuple4Code = new ArrayList<>();//四元组
+    public List<String> paramList = new ArrayList<>();//参数列表
     int offset = 0;
     String t = null;
     String w = null;
@@ -240,18 +241,21 @@ public class Anaylser {
                     }});
                 } else if("BM".equals(left) && "ε".equals(tail)){
                     valueStack.add(new HashMap<>(){{
-                        put("quad",Arrays.asList(String.valueOf(add3Code.size()+1)));
+                        put("quad",Arrays.asList(String.valueOf(add3Code.size())));
                     }});
                 } else if("N".equals(left) && "ε".equals(tail)){
                     List<String> l = new ArrayList<>();
                     add3Code.add("goto");
                     l.add(String.valueOf(add3Code.size()-1));
+                    valueStack.add(new HashMap<>(){{
+                        put("nextlist",l);
+                    }});
                 }
             } else {
                 List<String> symbolList = new ArrayList<>();
                 List<Map<String, List<String>>> valueList = new ArrayList<>();
                 for (int i = 0; i < right.size(); i++) {
-                    if (valueList.size()==symbolList.size() && valueStack.size()>0){
+                    if (valueList.size()==symbolList.size() && valueStack.size()>1){
                         valueList.add(valueStack.pop());
                     }
                     statusStack.pop();
@@ -288,7 +292,7 @@ public class Anaylser {
                     int val = Integer.parseInt(valueList.get(2).get("val").get(0));
                     int c1_width = Integer.parseInt(valueList.get(0).get("width").get(0));
                     valueStack.add(new HashMap<>() {{
-                        put("type", Arrays.asList(String.format("array({%d}, {%s});", val, valueList.get(0).get("type").get(0))));
+                        put("type", Arrays.asList(String.format("array(%d, %s);", val, valueList.get(0).get("type").get(0))));
                         put("width", Arrays.asList(String.valueOf(val * c1_width)));
                     }});
                 } else if ("M".equals(left)) {
@@ -303,11 +307,105 @@ public class Anaylser {
                             put("size", Arrays.asList("1"));
                         }});
                     }
-                } else if("S".equals(left) && "L = E ;".equals(tail)){
-
                 }
 
 //yu---------------------------------------------------------------------------------------------------
+                //S -> L = E ;  // 数组元素引用或赋值
+                //{gen(L.array ‘[’ L.offset ‘]’ ‘=’ E.addr);}
+                else if("S".equals(left) && "L = E ;".equals(tail)){
+                    tmpMap = valueList.get(3);
+                    String array = tmpMap.get("array").get(0);
+                    String offset = tmpMap.get("offset").get(0);
+                    String addr = valueList.get(1).get("addr").get(0);
+                    add3Code.add(String.format("%s[%s] = %s",array,offset,addr));
+                }
+                //S->id = E ;
+                //{p = lookup(id.lexeme);
+                //if p == null then error
+                //else gen(p ‘=’ E.addr);}
+                else if("S".equals(left) && "id = E ;".equals(tail)){
+                    List<String> p = symbolTable.get(valueList.get(3).get("lexeme").get(0));
+                    if(p == null){
+                        //TODO
+                    }else{
+                        String addr = valueList.get(1).get("addr").get(0);
+                        add3Code.add(String.format("%s = %s",valueList.get(3).get("lexeme").get(0),addr));
+                    }
+                }
+                //S->if ( B ) BM then S N else BM S  // 分支语句
+                //{backpatch(B.truelist, BM1.quad);
+                //backbatch(B.falselist, BM2.quad);
+                //temp = merge(S1.nextlist, N.nextlist);
+                //S.nextlist = merge(temp, S2.nextlist);}
+                else if("S".equals(left) && "if ( B ) BM then S N else BM S".equals(tail)){
+                    String bm1Quad = valueList.get(6).get("quad").get(0);
+                    String bm2Quad = valueList.get(1).get("quad").get(0);
+                    List<String> bTrue = valueList.get(8).get("truelist");
+                    List<String> bFalse = valueList.get(8).get("falselist");
+                    List<String> s1Next = valueList.get(4).get("nextlist");
+                    List<String> s2Next = valueList.get(0).get("nextlist");
+                    List<String> nNext = valueList.get(3).get("nextlist");
+                    for(String s:bTrue){
+                        int index = Integer.valueOf(s);
+                        String patched = add3Code.get(index) + " "+ bm1Quad;
+                        add3Code.set(index,patched);
+                    }
+                    for(String s:bFalse){
+                        int index = Integer.valueOf(s);
+                        String patched = add3Code.get(index) + " "+ bm2Quad;
+                        add3Code.set(index,patched);
+                    }
+                    s1Next.addAll(nNext);
+                    s1Next.addAll(s2Next);
+                    valueStack.add(new HashMap<>(){{
+                        put("nextlist",s1Next);
+                    }});
+                }
+                //S->while BM ( B ) do BM S  // 循环语句
+                //{backpatch(S1.nextlist, BM1.quad);
+                //Backpatch(B.truelist, BM2.quad);
+                //S.nextlist = B.falselist;
+                //gen(‘goto’ BM1.quad);}
+                else if("S".equals(left) && "while BM ( B ) do BM S".equals(tail)){
+                    List<String> s1Next = valueList.get(0).get("nextlist");
+                    List<String> bTrue = valueList.get(4).get("truelist");
+                    List<String> bFalse = valueList.get(4).get("falselist");
+                    String bm1Quad = valueList.get(6).get("quad").get(0);
+                    String bm2Quad = valueList.get(1).get("quad").get(0);
+                    for(String s:s1Next){
+                        int index = Integer.valueOf(s);
+                        String patched = add3Code.get(index) + " "+ bm1Quad;
+                        add3Code.set(index,patched);
+                    }
+                    for(String s:bTrue){
+                        int index = Integer.valueOf(s);
+                        String patched = add3Code.get(index) + " "+ bm2Quad;
+                        add3Code.set(index,patched);
+                    }
+                    valueStack.add(new HashMap<>(){{
+                        put("nextlist",bFalse);
+                    }});
+                    add3Code.add(String.format("goto %s",bm1Quad));
+                }
+                //S->call id ( Elist ) ;  // 过程调用语句
+                //{n = 0;
+                //for q 中的每个 t
+                //do {gen(‘param’ t);
+                //n = n + 1;}
+                //gen(‘call’ id.addr ‘,’ n);}
+                else if("S".equals(left) && "call id ( Elist ) ;".equals(tail)){
+                    int n=0;
+                    for(String s:paramList){
+                        n++;
+                        add3Code.add(String.format("param %s",s));
+                    }
+                    add3Code.add(String.format("call %s , %d",valueList.get(4).get("addr").get(0),n));
+                }
+                //S->return E ;
+                //{gen(‘return’ E.addr);}
+                else if("S".equals(left) && "return E ;".equals(tail)){
+                    add3Code.add(String.format("return %s",valueList.get(1).get("addr").get(0)));
+                }
                 //L -> L [ E ]
                 // {L.array = L1.array;
                 //L.type = L1.type.elem;
@@ -325,9 +423,9 @@ public class Anaylser {
                     //TODO
                     String width = tmpMap.get("width").get(0);//L1-width
                     String offset = tmpMap.get("offset").get(0);//L1-offset
-                    add3Code.add(String.format("t{%d} = {%s} * {%s}",tmpIndex,addr,width));
+                    add3Code.add(String.format("t%d = %s * %s",tmpIndex,addr,width));
                     tmpIndex++;
-                    add3Code.add(String.format("t{%d} = {%s} + t{%d}",tmpIndex,offset,tmpIndex-1));
+                    add3Code.add(String.format("t%d = %s + t%d",tmpIndex,offset,tmpIndex-1));
                     tmpIndex++;
                     String finalType = type;
                     valueStack.add(new HashMap<>(){{
@@ -355,7 +453,7 @@ public class Anaylser {
                         String width = elem.substring(elem.indexOf("(")+1,elem.indexOf(","));
                         tmpMap = valueList.get(1);//E
                         String addr = tmpMap.get("addr").get(0);
-                        add3Code.add(String.format("t{%d} = {%s} * {%s}",tmpIndex,addr,width));
+                        add3Code.add(String.format("t%d = %s * %s",tmpIndex,addr,width));
                         valueStack.add(new HashMap<>(){{
                             put("array",List.copyOf(p));
                             put("type",Arrays.asList(elem));
@@ -372,7 +470,7 @@ public class Anaylser {
                         put("addr",Arrays.asList("t"+String.valueOf(tmpIndex)));
                     }});
                     tmpIndex++;
-                    add3Code.add(String.format("t{%d} = {%s} + {%s}",tmpIndex-1,valueList.get(3).get("addr").get(0),valueList.get(0).get("addr").get(0)));
+                    add3Code.add(String.format("t%d = %s + %s",tmpIndex-1,valueList.get(2).get("addr").get(0),valueList.get(0).get("addr").get(0)));
                 }
                 //E -> G
                 //{E.addr = G.addr;}
@@ -390,7 +488,7 @@ public class Anaylser {
                     valueStack.add(new HashMap<>(){{
                         put("addr",Arrays.asList("t"+tmpIndex));
                     }});
-                    add3Code.add(String.format("t{%d} = {%s} * {%s}",tmpIndex,valueList.get(2).get("addr").get(0),valueList.get(0).get("addr").get(0)));
+                    add3Code.add(String.format("t%d = %s * %s",tmpIndex,valueList.get(2).get("addr").get(0),valueList.get(0).get("addr").get(0)));
                     tmpIndex++;
                 }
                 //G -> F
@@ -411,7 +509,7 @@ public class Anaylser {
                 //{F.addr = num.val;}
                 else if("F".equals(left) && "num".equals(tail)){
                     valueStack.add(new HashMap<>(){{
-                        put("addr",List.copyOf(valueList.get(0).get("val")));
+                        put("addr",Arrays.asList(valueList.get(0).get("lexeme").get(0)));
                     }});
                 }
                 //F -> id
@@ -431,14 +529,14 @@ public class Anaylser {
                 //{F.addr = real.val;}
                 else if("F".equals(left) && "real".equals(tail)){
                     valueStack.add(new HashMap<>(){{
-                        put("addr",List.copyOf(valueList.get(0).get("val")));
+                        put("addr",Arrays.asList(valueList.get(0).get("lexeme").get(0)));
                     }});
                 }
                 //F->character
                 //{F.addr = character.val;}
                 else if("F".equals(left) && "character".equals(tail)){
                     valueStack.add(new HashMap<>(){{
-                        put("addr",List.copyOf(valueList.get(0).get("val")));
+                        put("addr",Arrays.asList(valueList.get(0).get("lexeme").get(0)));
                     }});
                 }
                 //F->L
@@ -447,7 +545,7 @@ public class Anaylser {
                     tmpMap = valueStack.get(0);
                     Map<String, List<String>> finalTmpMap2 = tmpMap;
                     valueStack.add(new HashMap<>(){{
-                        put("addr",Arrays.asList(String.format("{%s}[{%s}]", finalTmpMap2.get("array").get(0), finalTmpMap2.get("offset").get(0))));
+                        put("addr",Arrays.asList(String.format("%s[%s]", finalTmpMap2.get("array").get(0), finalTmpMap2.get("offset").get(0))));
                     }});
                 }
                 //B -> B || BM H
@@ -545,7 +643,7 @@ public class Anaylser {
                     String e1Addr = valueList.get(2).get("addr").get(0);
                     String e2Addr = valueList.get(0).get("addr").get(0);
                     String rel = valueList.get(1).get("val").get(0);
-                    add3Code.add(String.format("if {%s} {%s} {%s} goto",e1Addr,rel,e2Addr));
+                    add3Code.add(String.format("if %s %s %s goto",e1Addr,rel,e2Addr));
                     add3Code.add("goto");
                     List<String> l1 = new ArrayList<>();
                     List<String> l2 = new ArrayList<>();
@@ -618,6 +716,7 @@ public class Anaylser {
                     valueStack.add(new HashMap<>(){{
                         put("size",Arrays.asList(String.valueOf((Integer.valueOf(finalTmpMap1.get("size").get(0))+1))));
                     }});
+                    paramList.add(valueList.get(0).get("addr").get(0));
                 }
                 //Elist -> E
                 //{Elist.size = 1}
@@ -625,6 +724,8 @@ public class Anaylser {
                     valueStack.add(new HashMap<>(){{
                         put("size",Arrays.asList("1"));
                     }});
+                    paramList = new ArrayList<>();
+                    paramList.add(valueList.get(0).get("addr").get(0));
                 }
             }
 
@@ -826,5 +927,8 @@ public class Anaylser {
         Anaylser anaylser = new Anaylser();
         //anaylser.tokens = Arrays.asList(Arrays.asList("int"),Arrays.asList("id"),Arrays.asList(";"),Arrays.asList("$"));
         anaylser.analyse();
+        for(String s:anaylser.add3Code){
+            System.out.println(s);
+        }
     }
 }
