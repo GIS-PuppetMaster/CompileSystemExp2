@@ -1,12 +1,24 @@
-int a;
-int b;
-int c;
-int d;
 int x;
-int y;
-int z;
+int y, z;
+int[4] f;
+int[4][2] g;
 
-while(a==1)
-do if(a>2)
-then a=3;
-else a=4;
+int k = 3;
+f[k] = 1;
+g[2][1] = 4;
+
+while(x < 10)
+do
+x = x * x;
+
+
+
+record stack {
+	int j;
+}
+
+proc int getsum(int a, int b) {
+	return a + b;
+}
+
+call getsum(1, 3);

@@ -33,10 +33,10 @@ public class Anaylser {
     public List<String> add3Code = new ArrayList<>();//三地址码
     public List<String> tuple4Code = new ArrayList<>();//四元组
     public List<String> paramList = new ArrayList<>();//参数列表
+    int tmpIndex = 0;//临时变量索引
     int offset = 0;
     String t = null;
     String w = null;
-    int tmpIndex = 0;//临时变量索引
 
     public void init() throws IOException {
         //清空栈
@@ -363,6 +363,7 @@ public class Anaylser {
                     String offset = tmpMap.get("offset").get(0);
                     String addr = valueList.get(1).get("addr").get(0);
                     add3Code.add(String.format("%s[%s] = %s",array,offset,addr));
+                    tuple4Code.add(String.format("(= , %s , - , %s[%s])",addr,array,offset));
                     valueStack.add(new HashMap<>());
                 }
                 //S->id = E ;
@@ -372,7 +373,7 @@ public class Anaylser {
                 else if("S".equals(left) && "id = E ;".equals(tail)){
                     List<String> p = symbolTable.get(valueList.get(3).get("lexeme").get(0));
                     if(p == null){
-                        //TODO
+                        errorLog.add(String.format("Error at Line %s: 变量未声明",line));
                     }else{
                         String addr = valueList.get(1).get("addr").get(0);
                         add3Code.add(String.format("%s = %s",valueList.get(3).get("lexeme").get(0),addr));
@@ -502,7 +503,7 @@ public class Anaylser {
                     tuple4Code.add(String.format("(* , %s , %d , t%d)",addr,width,tmpIndex));
                     tmpIndex++;
                     add3Code.add(String.format("t%d = %s + t%d",tmpIndex,offset,tmpIndex-1));
-                    tuple4Code.add(String.format("(* , %s , t%d , t%d)",offset,tmpIndex-1,tmpIndex));
+                    tuple4Code.add(String.format("(+ , %s , t%d , t%d)",offset,tmpIndex-1,tmpIndex));
                     tmpIndex++;
                     int finalWidth = width;
                     valueStack.add(new HashMap<>(){{
@@ -524,8 +525,8 @@ public class Anaylser {
                     List<String> p = symbolTable.get(tmpMap.get("lexeme").get(0));
                     String array = tmpMap.get("lexeme").get(0);
                     if(p == null){
-                        //TODO
                         //变量未声明
+                        errorLog.add(String.format("Error at Line %s: 变量未声明",line));
                     }else{
                         String type = p.get(0);
                         String finalType = type;
@@ -609,7 +610,7 @@ public class Anaylser {
                 else if("F".equals(left) && "id".equals(tail)){
                     List<String> p = valueList.get(0).get("lexeme");
                     if(p == null){
-                        //未定义
+                        errorLog.add(String.format("Error at Line %s: 变量未声明",line));
                     }else{
                         valueStack.add(new HashMap<>(){{
                             put("addr",Arrays.asList(p.get(0)));
@@ -867,6 +868,9 @@ public class Anaylser {
     //打印栈内信息
     public void printStack() {
         System.out.println(String.format("%-90s", this.statusStack) + String.format("%-90s", this.symbolStack)+ String.format("%-90s", this.valueStack));
+        if(this.symbolStack.size()!=valueStack.size()){
+            System.out.println("error");
+        }
     }
 
     //处理错误
@@ -1040,17 +1044,6 @@ public class Anaylser {
         Anaylser anaylser = new Anaylser();
         //anaylser.tokens = Arrays.asList(Arrays.asList("int"),Arrays.asList("id"),Arrays.asList(";"),Arrays.asList("$"));
         anaylser.analyse();
-        anaylser.add3Code.add("exit");
-        anaylser.tuple4Code.add("-");
-        for(int i=0;i<anaylser.add3Code.size();i++){
-            String s = anaylser.add3Code.get(i);
-            if(s.contains("goto") && s.charAt(s.length()-1)=='o'){
-                String patchedTuple = anaylser.tuple4Code.get(i);
-                patchedTuple = patchedTuple.substring(0,patchedTuple.length()-1)+(anaylser.add3Code.size()-1)+")";
-                anaylser.tuple4Code.set(i,patchedTuple);
-                anaylser.add3Code.set(i,s+" "+(anaylser.add3Code.size()-1));
-            }
-        }
         int line = 0;
         for(int i=0;i<anaylser.add3Code.size();i++){
             System.out.println(line+" "+anaylser.add3Code.get(i)+" "+anaylser.tuple4Code.get(i));
