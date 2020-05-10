@@ -372,9 +372,15 @@ public class Anaylser {
                 //else gen(p ‘=’ E.addr);}
                 else if("S".equals(left) && "id = E ;".equals(tail)){
                     List<String> p = symbolTable.get(valueList.get(3).get("lexeme").get(0));
+                    List<String> p2 = symbolTable.get(valueList.get(1).get("addr").get(0));
                     if(p == null){
-                        errorLog.add(String.format("Error at Line %s: 变量未声明",line));
+                        errorLog.add(String.format("Error at Line %s: 变量未声明 %s\n",line,valueList.get(3).get("lexeme").get(0)));
                     }else{
+                        if(p2!=null){
+                            if(!p.get(0).equals(p2.get(0))){
+                                errorLog.add(String.format("Error at Line %s: 变量类型不匹配 %s: %s, %s: %s\n",line, valueList.get(3).get("lexeme").get(0),p.get(0),valueList.get(1).get("addr").get(0),p2.get(0)));
+                            }
+                        }
                         String addr = valueList.get(1).get("addr").get(0);
                         add3Code.add(String.format("%s = %s",valueList.get(3).get("lexeme").get(0),addr));
                         tuple4Code.add(String.format("(= , %s , - , %s)",addr,valueList.get(3).get("lexeme").get(0)));
