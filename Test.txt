@@ -1,6 +1,111 @@
-S' -> S
-S -> L = R
-S -> R
-L -> * R
-L -> id
-R -> L
+int a;
+while(a>3)
+do
+if(a<4)
+then a=1;
+else  a=3;
+
+
+
+
+
+int x;
+int y;
+int z;
+int[4] f;
+int[4][2] g;
+int k;
+
+proc int getsum(int a, int b) {
+	return a + b;
+}
+
+k=3;
+f[k] = 1;
+g[2][1] = 4;
+
+call getsum(x, y);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+struct student{
+    int id ;
+    char name ;
+}
+
+int [2][3] array;
+array[0][1] = 2;
+int temp;
+temp = array[0][1];
+
+int a;
+a = 0xf;
+int b;  int c;  int d;
+int e;  int f;
+int x;  int y;  int z;
+
+while (a < b)
+    do
+    if (c < 5) then
+        while (x > y)
+        do
+            z = x + 1;
+    else
+        x = y;
+
+a = 1 ;
+if(a < b || c < d && e < f) then
+    x = a;
+else
+    x = b;
+x = 1 ;
+proc int getSum(int elem1, int elem2){
+         int sum;
+         sum = elem1 + elem2;
+         return sum;
+}
+
+call getSum(a,b);
+
+
+
+
+
+
+
+
+
+
+
+
+
+int x;
+int y;
+int z;
+int[4] f;
+int[4][2] g;
+int x;
+int k;
+
+proc int getsum(int a, int b) {
+	return a + b;
+}
+
+k=3;
+p = 2;
+f[k] = 1;
+g[2][1] = 4;
+x = f;
+
+call getsum(x, y);

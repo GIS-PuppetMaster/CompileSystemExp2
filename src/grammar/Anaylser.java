@@ -667,7 +667,7 @@ public class Anaylser {
                     List<String> b1True = new ArrayList(b1True_);
                     List<String> hTrue_ = valueList.get(0).get("truelist");
                     List<String> hTrue = new ArrayList(hTrue_);
-                    List<String> hFalse = valueList.get(0).get("truelist");
+                    List<String> hFalse = valueList.get(0).get("falselist");
                     b1True.addAll(hTrue);
                     valueStack.add(new HashMap<>(){{
                         put("truelist",List.copyOf(b1True));
