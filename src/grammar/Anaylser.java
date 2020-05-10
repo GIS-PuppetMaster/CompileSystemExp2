@@ -657,8 +657,10 @@ public class Anaylser {
                         tuple4Code.set(index,patchedTuple);
                         add3Code.set(index,patched);
                     }
-                    List<String> b1True = valueList.get(3).get("truelist");
-                    List<String> hTrue = valueList.get(0).get("truelist");
+                    List<String> b1True_ = valueList.get(3).get("truelist");
+                    List<String> b1True = new ArrayList(b1True_);
+                    List<String> hTrue_ = valueList.get(0).get("truelist");
+                    List<String> hTrue = new ArrayList(hTrue_);
                     List<String> hFalse = valueList.get(0).get("truelist");
                     b1True.addAll(hTrue);
                     valueStack.add(new HashMap<>(){{
@@ -693,7 +695,8 @@ public class Anaylser {
                         add3Code.set(index,patched);
                     }
                     List<String> iTrue = valueList.get(0).get("truelist");
-                    List<String> h1False = valueList.get(3).get("falselist");
+                    List<String> h1False_ = valueList.get(3).get("falselist");
+                    List<String> h1False = new ArrayList(h1False_);
                     List<String> iFalse = valueList.get(0).get("falselist");
                     h1False.addAll(iFalse);
                     valueStack.add(new HashMap<>(){{
