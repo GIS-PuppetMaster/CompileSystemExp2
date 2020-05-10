@@ -43,20 +43,22 @@ public class UI {
     }
     public static String outputSymbolTable(Map<String, List<String>> table){
         StringBuilder stringBuilder = new StringBuilder();
-        String form = "%22s %20s %20s %16s\n";
-        stringBuilder.append(String.format("%16s %16s %16s %8s\n","标识符","类型","偏移量","行号"));
+        String form = "%8s %22s %20s %20s %16s\n";
+        stringBuilder.append(String.format("%4s %16s %16s %16s %8s\n","序号","标识符","类型","偏移量","行号"));
+        int i=0;
         for(Map.Entry<String,List<String>> entry : table.entrySet()){
-            stringBuilder.append(String.format(form,entry.getKey(),entry.getValue().get(0),entry.getValue().get(1),entry.getValue().get(2)));
+            stringBuilder.append(String.format(form, i, entry.getKey(),entry.getValue().get(0),entry.getValue().get(1),entry.getValue().get(2)));
+            i++;
         }
         return stringBuilder.toString();
     }
     public static String outputCode(List<String> addr3code, List<String> tuple4code){
         StringBuilder stringBuilder = new StringBuilder();
-        String form = "%32s %30s\n";
-        stringBuilder.append(String.format("%24s %24s\n","三地址码","四元式"));
+        String form = "%8s %32s %30s\n";
+        stringBuilder.append(String.format("%4s %24s %24s\n","序号", "三地址码","四元式"));
         int size = addr3code.size();
         for(int i=0;i<size;i++){
-            stringBuilder.append(String.format(form,addr3code.get(i),tuple4code.get(i),"行号"));
+            stringBuilder.append(String.format(form, i, addr3code.get(i),tuple4code.get(i),"行号"));
         }
         return stringBuilder.toString();
     }
