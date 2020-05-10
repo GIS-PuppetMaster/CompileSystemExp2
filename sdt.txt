@@ -1,158 +1,28 @@
-要求：给出如下语言成分所对应的语义动作
-	声明语句（包括变量声明、数组声明、记录声明和过程声明）
-	表达式及赋值语句（包括数组元素的引用和赋值）
-	分支语句：if_then_else
-	循环语句：do_while
-	过程调用语句
-
-{offset = 0;}
-1.	Program -> P
-2.	P -> D P | S P | ε
-3.	D -> T id ;    // 变量声明，数组声明
-{enter(id.lexeme, T.type, offset);
-offset = offset + T.width;}
-| struct id DM1 { P }   // 记录声明
-| proc X id DM2 ( M ) { P }  // 过程声明
-4.	DM1 -> ε
-{type = ‘record’;
-enterrecord(id.lexeme, type, offset);}
-5.	DM2 -> ε
-{type = ‘proc’;
-enterproc(id.lexeme, type, offset);}
-6.	T -> X TM C
-{T.type = C.type; T.width = C.width;}
-7.	TM -> ε
-{t = X.type; w = X.width;}
-8.	X -> int
-{X.type = int; X.width = 4;}
-| float
-{X.type = float; X.width = 8;}
-| char
-{X.type = char; X.width = 1;}
-9.	C -> [ num ] C
-{C.type = array(num.val, C1.type);
-C.width = num.val * C1.width;}
-| ε
-{C.type = t; C.width = w;}
-10.	M -> M , X id
-{enter(id.lexeme, X.type, offset);
-offset = offset + X.width;
-M.size = M1.size + 1;}
-| X id
-{enter(id.lexeme, X.type, offset);
-offset = offset + X.width;
-M.size = 1;}
-11.	S -> L = E ;  // 数组元素引用或赋值
-{gen(L.array ‘[’ L.offset ‘]’ ‘=’ E.addr);}
-| id = E ;
-{p = lookup(id.lexeme);
-if p == null then error
-else gen(p ‘=’ E.addr);}
-| if ( B ) BM then S N else BM S  // 分支语句
-{backpatch(B.truelist, BM1.quad);
-backbatch(B.falselist, BM2.quad);
-temp = merge(S1.nextlist, N.nextlist);
-S.nextlist = merge(temp, S2.nextlist);}
-| while BM ( B ) do BM S  // 循环语句
-{backpatch(S1.nextlist, BM1.quad);
-Backpatch(B.truelist, BM2.quad);
-S.nextlist = B.falselist;
-gen(‘goto’ BM1.quad);}
-| call id ( Elist ) ;  // 过程调用语句
-{n = 0;
-for q 中的每个 t
-do {gen(‘param’ t);
-n = n + 1;}
-gen(‘call’ id.addr ‘,’ n);}
-| return E ;
-{gen(‘return’ E.addr);}
-12.	BM -> ε
-{BM.quad = nextquad;}
-13.	N -> ε
-{N.nextlist = makelist(nextquad);
-gen(‘goto’);}
-14.	L -> L [ E ]
-{L.array = L1.array;
-L.type = L1.type.elem;
-t = newtemp();
-gen(t ‘=’ E.addr ‘*’ L.type.width);
-L.offset = newtemp();
-gen(L.offset ‘=’ L1.offset ‘+’ t);}
-| id [ E ]
-{p = lookup(id.lexeme);
-if p == null then error
-else L.array = p;
-L.type = p.type.elem;
-L.offset = newtemp();
-gen(L.offset ‘=’ E.addr ‘*’ L.type.width);}
-15.	E -> E + G
-{E.addr = newtemp();
-gen(E.addr ‘=’ E1.addr ‘+’ G.addr);}
-| G
-{E.addr = G.addr;}
-16.	G -> G * F
-{G.addr = newtemp;
-gen(G.addr ‘=’ G1.addr ‘*’ F.addr);}
-| F
-{G.addr = F.addr;}
-17.	F -> ( E )
-{F.addr = E.addr;}
-| num
-{F.addr = num.val;}
-| id
-{F.addr = looup(id.lexeme);
-if F.addr == null then error;}
-| real
-{F.addr = real.val;}
-| character
-{F.addr = character.val;}
-| L
-{F.addr ‘=’ L.array ‘[’ L.offset ‘]’;}
-18.	B -> B || BM H
-{backpatch(B1.falselist, BM.quad);
-B.truelist = merge(B1.truelist, H.truelist);
-B.falselist = H.falselist;}
-| H
-{B.truelist = H.truelist;
-B.falselist = H.falselist;}
-19.	H -> H && BM I
-{backpatch(H1.truelist, BM.quad);
-H.truelist = I.truelist;
-H.falselist = merge(H1.falselist, I.falselist);}
-| I
-{H.truelist = I.truelist;
-H.falselist = I.falselist;}
-20.	I -> ! I
-{I.truelist = I1.falselist;
-I.falselist = I1.truelist;}
-| ( B )
-{I.truelist = B.truelist;
-I.falselist = B.falselist;}
-| E relop E
-{I.truelist = makelist(nextquad);
-I.falselist = mekelist(nextquad + 1);
-gen(‘if’ E1.addr relop.val E2.addr ‘goto’);
-gen(‘goto’)}
-| true
-{I.truelist = mekelist(nextquad);
-gen(‘goto’)}
-| false
-{I.falselist = makelist(nextquad);
-gen(‘goto’)}
-21.	relop -> <
-{relop.val = ‘<’}
-| >
-{relop.val = ‘>’}
-| <=
-{relop.val = ‘<=’}
-| >=
-{relop.val = ‘>=’}
-| !=
-{relop.val = ‘!=’}
-| ==
-{relop.val = ‘==’}
-22.	Elist -> Elist , E
-{Elist.size = Elist1.size + 1;}
-| E
-{Elist.size = 1}
-
+if(symbolStack.peek().equals("S")){
+                Map<String,List<String>> tmpMap = valueStack.peek();
+                String nextQuad = String.valueOf(add3Code.size());
+                if(tmpMap.containsKey("nextlist")){
+                    List<String> nextlist = tmpMap.get("nextlist");
+                    for(String s:nextlist){
+                        int index = Integer.valueOf(s);
+                        String patched = add3Code.get(index) + " "+ nextQuad;
+                        add3Code.set(index,patched);
+                    }
+                }
+                if(tmpMap.containsKey("truelist")){
+                    List<String> truelist = tmpMap.get("truelist");
+                    for(String s:truelist){
+                        int index = Integer.valueOf(s);
+                        String patched = add3Code.get(index) + " "+ nextQuad;
+                        add3Code.set(index,patched);
+                    }
+                }
+                if(tmpMap.containsKey("falselist")){
+                    List<String> falselist = tmpMap.get("falselist");
+                    for(String s:falselist){
+                        int index = Integer.valueOf(s);
+                        String patched = add3Code.get(index) + " "+ nextQuad;
+                        add3Code.set(index,patched);
+                    }
+                }
+            }

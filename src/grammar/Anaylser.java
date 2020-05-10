@@ -196,6 +196,9 @@ public class Anaylser {
                     for(String s:nextlist){
                         int index = Integer.valueOf(s);
                         String patched = add3Code.get(index) + " "+ nextQuad;
+                        String patchedTuple =tuple4Code.get(index);
+                        patchedTuple = patchedTuple.substring(0,patchedTuple.length()-1)+nextQuad+")";
+                        tuple4Code.set(index,patchedTuple);
                         add3Code.set(index,patched);
                     }
                 }
@@ -259,6 +262,7 @@ public class Anaylser {
                 } else if("N".equals(left)){
                     List<String> l = new ArrayList<>();
                     add3Code.add("goto");
+                    tuple4Code.add("(j , - , - , )");
                     l.add(String.valueOf(add3Code.size()-1));
                     valueStack.add(new HashMap<>(){{
                         put("nextlist",l);
@@ -361,6 +365,7 @@ public class Anaylser {
                     }else{
                         String addr = valueList.get(1).get("addr").get(0);
                         add3Code.add(String.format("%s = %s",valueList.get(3).get("lexeme").get(0),addr));
+                        tuple4Code.add(String.format("(= , %s , - , %s)",addr,valueList.get(3).get("lexeme").get(0)));
                     }
                     valueStack.add(new HashMap<>());
                 }
@@ -380,11 +385,17 @@ public class Anaylser {
                     for(String s:bTrue){
                         int index = Integer.valueOf(s);
                         String patched = add3Code.get(index) + " "+ bm1Quad;
+                        String patchedTuple =tuple4Code.get(index);
+                        patchedTuple = patchedTuple.substring(0,patchedTuple.length()-1)+bm1Quad+")";
+                        tuple4Code.set(index,patchedTuple);
                         add3Code.set(index,patched);
                     }
                     for(String s:bFalse){
                         int index = Integer.valueOf(s);
                         String patched = add3Code.get(index) + " "+ bm2Quad;
+                        String patchedTuple =tuple4Code.get(index);
+                        patchedTuple = patchedTuple.substring(0,patchedTuple.length()-1)+bm2Quad+")";
+                        tuple4Code.set(index,patchedTuple);
                         add3Code.set(index,patched);
                     }
                     if(s1Next!=null) nNext.addAll(s1Next);
@@ -409,18 +420,25 @@ public class Anaylser {
                         for (String s : s1Next) {
                             int index = Integer.valueOf(s);
                             String patched = add3Code.get(index) + " " + bm1Quad;
+                            String patchedTuple =tuple4Code.get(index);
+                            patchedTuple = patchedTuple.substring(0,patchedTuple.length()-1)+bm1Quad+")";
+                            tuple4Code.set(index,patchedTuple);
                             add3Code.set(index, patched);
                         }
                     }
                     for(String s:bTrue){
                         int index = Integer.valueOf(s);
                         String patched = add3Code.get(index) + " "+ bm2Quad;
+                        String patchedTuple =tuple4Code.get(index);
+                        patchedTuple = patchedTuple.substring(0,patchedTuple.length()-1)+bm2Quad+")";
+                        tuple4Code.set(index,patchedTuple);
                         add3Code.set(index,patched);
                     }
                     valueStack.add(new HashMap<>(){{
                         put("nextlist",bFalse);
                     }});
                     add3Code.add(String.format("goto %s",bm1Quad));
+                    tuple4Code.add(String.format("(j , - , - , %s)",bm1Quad));
                 }
                 //S->call id ( Elist ) ;  // 过程调用语句
                 //{n = 0;
@@ -433,14 +451,17 @@ public class Anaylser {
                     for(String s:paramList){
                         n++;
                         add3Code.add(String.format("param %s",s));
+                        tuple4Code.add(String.format("(j , - , - , %s)",s));
                     }
                     add3Code.add(String.format("call %s , %d",valueList.get(4).get("lexeme").get(0),n));
+                    tuple4Code.add(String.format("(%d , call , - , %s)",n,valueList.get(4).get("lexeme").get(0)));
                     valueStack.add(new HashMap<>());
                 }
                 //S->return E ;
                 //{gen(‘return’ E.addr);}
                 else if("S".equals(left) && "return E ;".equals(tail)){
                     add3Code.add(String.format("return %s",valueList.get(1).get("addr").get(0)));
+                    tuple4Code.add(String.format("(return , - , - , %s",valueList.get(1).get("addr").get(0)));
                     valueStack.add(new HashMap<>());
                 }
                 //L -> L [ E ]
@@ -458,15 +479,19 @@ public class Anaylser {
                     String type = tmpMap.get("type").get(0);
                     String finalType = type;
                     //TODO
-                    int width = 1;
+                    int width = 4;
+                    type = type.substring(type.indexOf(",")+2,type.length()-2);
                     while(!type.equals("int")){
                         width *= Integer.valueOf(type.substring(type.indexOf("(")+1,type.indexOf(",")));
                         type = type.substring(type.indexOf(",")+2,type.length()-2);
+
                     }
                     String offset = tmpMap.get("offset").get(0);//L1-offset
                     add3Code.add(String.format("t%d = %s * %d",tmpIndex,addr,width));
+                    tuple4Code.add(String.format("(* , %s , %d , t%d)",addr,width,tmpIndex));
                     tmpIndex++;
                     add3Code.add(String.format("t%d = %s + t%d",tmpIndex,offset,tmpIndex-1));
+                    tuple4Code.add(String.format("(* , %s , t%d , t%d)",offset,tmpIndex-1,tmpIndex));
                     tmpIndex++;
                     int finalWidth = width;
                     valueStack.add(new HashMap<>(){{
@@ -493,8 +518,9 @@ public class Anaylser {
                     }else{
                         String type = p.get(0);
                         String finalType = type;
-                        String elem = type.substring(type.indexOf(",")+1,type.length()-2);
-                        int width = 1;
+                        String elem = type.substring(type.indexOf(",")+2,type.length()-2);
+                        int width = 4;
+                        type = type.substring(type.indexOf(",")+2,type.length()-2);
                         while(!type.equals("int")){
                             width *= Integer.valueOf(type.substring(type.indexOf("(")+1,type.indexOf(",")));
                             type = type.substring(type.indexOf(",")+2,type.length()-2);
@@ -503,6 +529,7 @@ public class Anaylser {
                         tmpMap = valueList.get(1);//E
                         String addr = tmpMap.get("addr").get(0);
                         add3Code.add(String.format("t%d = %s * %d",tmpIndex,addr,width));
+                        tuple4Code.add(String.format("(* , %s , %d , t%d)",addr,width,tmpIndex));
                         int finalWidth = width;
                         valueStack.add(new HashMap<>(){{
                             put("array",Arrays.asList(array));
@@ -522,6 +549,7 @@ public class Anaylser {
                     }});
                     tmpIndex++;
                     add3Code.add(String.format("t%d = %s + %s",tmpIndex-1,valueList.get(2).get("addr").get(0),valueList.get(0).get("addr").get(0)));
+                    tuple4Code.add(String.format("(+ , %s , %s , t%d)",valueList.get(2).get("addr").get(0),valueList.get(0).get("addr").get(0),tmpIndex-1));
                 }
                 //E -> G
                 //{E.addr = G.addr;}
@@ -540,6 +568,7 @@ public class Anaylser {
                         put("addr",Arrays.asList("t"+tmpIndex));
                     }});
                     add3Code.add(String.format("t%d = %s * %s",tmpIndex,valueList.get(2).get("addr").get(0),valueList.get(0).get("addr").get(0)));
+                    tuple4Code.add(String.format("(* , %s , %s , t%d)",valueList.get(2).get("addr").get(0),valueList.get(0).get("addr").get(0),tmpIndex));
                     tmpIndex++;
                 }
                 //G -> F
@@ -609,6 +638,9 @@ public class Anaylser {
                     for(String s:b1False){
                         int index = Integer.valueOf(s);
                         String patched = add3Code.get(index) + " "+ quad;
+                        String patchedTuple =tuple4Code.get(index);
+                        patchedTuple = patchedTuple.substring(0,patchedTuple.length()-1)+quad+")";
+                        tuple4Code.set(index,patchedTuple);
                         add3Code.set(index,patched);
                     }
                     List<String> b1True = valueList.get(3).get("truelist");
@@ -641,6 +673,9 @@ public class Anaylser {
                     for(String s:h1True){
                         int index = Integer.valueOf(s);
                         String patched = add3Code.get(index)+" "+quad;
+                        String patchedTuple =tuple4Code.get(index);
+                        patchedTuple = patchedTuple.substring(0,patchedTuple.length()-1)+quad+")";
+                        tuple4Code.set(index,patchedTuple);
                         add3Code.set(index,patched);
                     }
                     List<String> iTrue = valueList.get(0).get("truelist");
@@ -695,7 +730,9 @@ public class Anaylser {
                     String e2Addr = valueList.get(0).get("addr").get(0);
                     String rel = valueList.get(1).get("val").get(0);
                     add3Code.add(String.format("if %s %s %s goto",e1Addr,rel,e2Addr));
+                    tuple4Code.add(String.format("(j %s , - , - , )",rel));
                     add3Code.add("goto");
+                    tuple4Code.add(String.format("(j , - , - , )"));
                     List<String> l1 = new ArrayList<>();
                     List<String> l2 = new ArrayList<>();
                     l1.add(String.valueOf(add3Code.size()-2));
@@ -710,6 +747,7 @@ public class Anaylser {
                 //gen(‘goto’)}
                 else if("I".equals(left) && "true".equals(tail)){
                     add3Code.add("goto");
+                    tuple4Code.add(String.format("(j , - , - , )"));
                     List<String> l1 = new ArrayList<>();
                     l1.add(String.valueOf(add3Code.size()-1));
                     valueStack.add(new HashMap<>(){{
@@ -721,6 +759,7 @@ public class Anaylser {
                 //gen(‘goto’)}
                 else if("I".equals(left) && "false".equals(tail)){
                     add3Code.add("goto");
+                    tuple4Code.add(String.format("(j , - , - , )"));
                     List<String> l1 = new ArrayList<>();
                     l1.add(String.valueOf(add3Code.size()-1));
                     valueStack.add(new HashMap<>(){{
@@ -781,7 +820,19 @@ public class Anaylser {
             }
 
 
-
+            /*if(symbolStack.peek().equals("S")){
+                System.out.println("1");
+                Map<String,List<String>> tmpMap1 = valueStack.peek();
+                String nextQuad = String.valueOf(add3Code.size());
+                if(tmpMap1.containsKey("nextlist")){
+                    List<String> nextlist = tmpMap1.get("nextlist");
+                    for(String s:nextlist){
+                        int index = Integer.valueOf(s);
+                        String patched = add3Code.get(index) + " "+ nextQuad;
+                        add3Code.set(index,patched);
+                    }
+                }
+            }*/
 
             reduceDetail.add(prod);
             symbolStack.add(left);
@@ -978,10 +1029,21 @@ public class Anaylser {
         Anaylser anaylser = new Anaylser();
         //anaylser.tokens = Arrays.asList(Arrays.asList("int"),Arrays.asList("id"),Arrays.asList(";"),Arrays.asList("$"));
         anaylser.analyse();
+        anaylser.add3Code.add("exit");
+        anaylser.tuple4Code.add("-");
+        for(int i=0;i<anaylser.add3Code.size();i++){
+            String s = anaylser.add3Code.get(i);
+            if(s.contains("goto") && s.charAt(s.length()-1)=='o'){
+                String patchedTuple = anaylser.tuple4Code.get(i);
+                patchedTuple = patchedTuple.substring(0,patchedTuple.length()-1)+(anaylser.add3Code.size()-1)+")";
+                anaylser.tuple4Code.set(i,patchedTuple);
+                anaylser.add3Code.set(i,s+" "+(anaylser.add3Code.size()-1));
+            }
+        }
         int line = 0;
-        for(String s:anaylser.add3Code){
+        for(int i=0;i<anaylser.add3Code.size();i++){
+            System.out.println(line+" "+anaylser.add3Code.get(i)+" "+anaylser.tuple4Code.get(i));
             line++;
-            System.out.println(line+" "+s);
         }
     }
 }

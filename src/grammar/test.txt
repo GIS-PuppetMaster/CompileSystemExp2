@@ -1,2 +1,12 @@
-int i;
-int i;
+int a;
+int b;
+int c;
+int d;
+int x;
+int y;
+int z;
+
+while(a==1)
+do if(a>2)
+then a=3;
+else a=4;
