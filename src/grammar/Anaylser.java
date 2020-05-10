@@ -163,6 +163,17 @@ public class Anaylser {
         for (String s : errorMessage) {
             System.out.println(s);
         }
+        add3Code.add("exit");
+        tuple4Code.add("-");
+        for(int i=0;i<add3Code.size();i++){
+            String s = add3Code.get(i);
+            if(s.contains("goto") && s.charAt(s.length()-1)=='o'){
+                String patchedTuple = tuple4Code.get(i);
+                patchedTuple = patchedTuple.substring(0,patchedTuple.length()-1)+(add3Code.size()-1)+")";
+                tuple4Code.set(i,patchedTuple);
+                add3Code.set(i,s+" "+(add3Code.size()-1));
+            }
+        }
     }
 
     public void addToSymbolTable(String key,List<String> list) {
