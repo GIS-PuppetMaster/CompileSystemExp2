@@ -1,2 +1,19 @@
-int a;
-a=2;
+int x;
+int y;
+int z;
+int[4] f;
+int[4][2] g;
+int x;
+int k;
+
+proc int getsum(int a, int b) {
+	return a + b;
+}
+
+k=3;
+p = 2;
+f[k] = 1;
+g[2][1] = 4;
+x = f;
+
+call getsum(x, y);

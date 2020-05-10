@@ -1,12 +1,19 @@
-int a;
-int b;
-int c;
-int d;
 int x;
 int y;
 int z;
+int[4] f;
+int[4][2] g;
+int x;
+int k;
 
-while(a==1)
-do if(a>2)
-then a=3;
-else a=4;
+proc int getsum(int a, int b) {
+	return a + b;
+}
+
+k=3;
+p = 2;
+f[k] = 1;
+g[2][1] = 4;
+x = f;
+
+call getsum(x, y);
