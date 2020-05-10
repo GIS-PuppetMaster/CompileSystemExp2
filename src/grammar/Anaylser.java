@@ -634,7 +634,7 @@ public class Anaylser {
                 //F->L
                 //{F.addr ‘=’ L.array ‘[’ L.offset ‘]’;}
                 else if("F".equals(left) && "L".equals(tail)){
-                    tmpMap = valueStack.get(0);
+                    tmpMap = valueList.get(0);
                     Map<String, List<String>> finalTmpMap2 = tmpMap;
                     valueStack.add(new HashMap<>(){{
                         put("addr",Arrays.asList(String.format("%s[%s]", finalTmpMap2.get("array").get(0), finalTmpMap2.get("offset").get(0))));
