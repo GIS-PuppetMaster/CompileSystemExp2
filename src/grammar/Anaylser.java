@@ -159,9 +159,11 @@ public class Anaylser {
         }
         System.out.println("语法分析树输出：");
         outputResult();
-        System.out.println("错误信息：");
-        for (String s : errorMessage) {
-            System.out.println(s);
+        if(errorMessage.size()!=0) {
+            System.out.println("错误信息：");
+            for (String s : errorMessage) {
+                System.out.println(s);
+            }
         }
         add3Code.add("exit");
         tuple4Code.add("-");
@@ -640,7 +642,7 @@ public class Anaylser {
                 //F->L
                 //{F.addr ‘=’ L.array ‘[’ L.offset ‘]’;}
                 else if("F".equals(left) && "L".equals(tail)){
-                    tmpMap = valueStack.get(0);
+                    tmpMap = valueList.get(0);
                     Map<String, List<String>> finalTmpMap2 = tmpMap;
                     valueStack.add(new HashMap<>(){{
                         put("addr",Arrays.asList(String.format("%s[%s]", finalTmpMap2.get("array").get(0), finalTmpMap2.get("offset").get(0))));
@@ -661,8 +663,10 @@ public class Anaylser {
                         tuple4Code.set(index,patchedTuple);
                         add3Code.set(index,patched);
                     }
-                    List<String> b1True = valueList.get(3).get("truelist");
-                    List<String> hTrue = valueList.get(0).get("truelist");
+                    List<String> b1True_ = valueList.get(3).get("truelist");
+                    List<String> b1True = new ArrayList(b1True_);
+                    List<String> hTrue_ = valueList.get(0).get("truelist");
+                    List<String> hTrue = new ArrayList(hTrue_);
                     List<String> hFalse = valueList.get(0).get("truelist");
                     b1True.addAll(hTrue);
                     valueStack.add(new HashMap<>(){{
@@ -697,7 +701,8 @@ public class Anaylser {
                         add3Code.set(index,patched);
                     }
                     List<String> iTrue = valueList.get(0).get("truelist");
-                    List<String> h1False = valueList.get(3).get("falselist");
+                    List<String> h1False_ = valueList.get(3).get("falselist");
+                    List<String> h1False = new ArrayList(h1False_);
                     List<String> iFalse = valueList.get(0).get("falselist");
                     h1False.addAll(iFalse);
                     valueStack.add(new HashMap<>(){{
